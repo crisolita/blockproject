@@ -60,3 +60,15 @@ export const updateUserBalance = async (
     },
   });
 };
+export const updateUserAuthToken = async (
+  id: string,
+  authToken: number,
+  prisma: PrismaClient
+) => {
+  return await prisma.user.update({
+    where: { id: Number(id) },
+    data: {
+      authToken,
+    },
+  });
+};

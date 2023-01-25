@@ -7,9 +7,11 @@ import {
   getUserByEmail,
   getUserById,
   updateUser,
+  updateUserAuthToken,
   updateUserWalletAddress,
 } from "../service/user";
 import { sendEmail } from "../service/mail";
+import { createWallet, manageKeys } from "../service/web3";
 
 export const convertFullName = (str: string) =>
   str.split(", ").reverse().join(" ");
@@ -43,13 +45,16 @@ export const userRegisterController = async (req: Request, res: Response) => {
     const { email, fullName, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
     if (!user) {
+      const wallet = await createWallet(bcrypt.hashSync(password, salt));
       await prisma.user.create({
         data: {
           email: email,
           fullName: fullName,
           password: bcrypt.hashSync(password, salt),
+          wallet: wallet?.address,
         },
       });
+
       res.json(
         normalizeResponse({ data: { email: email, fullName: fullName } })
       );
@@ -98,7 +103,9 @@ export const recoverPasswordController = async (
     res.json(normalizeResponse({ error }));
   }
 };
-
+let authCode = JSON.stringify(
+  Math.round(Math.random() * (999999 - 100000) + 100000)
+);
 export const userLoginController = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
@@ -107,7 +114,8 @@ export const userLoginController = async (req: Request, res: Response) => {
     const user = await getUserByEmail(email, prisma);
 
     if (user && user.password && bcrypt.compareSync(password, user.password)) {
-      sendEmail(email);
+      await sendEmail(email, authCode);
+      await updateUserAuthToken(user.id.toString(), Number(authCode), prisma);
       return res.json(
         normalizeResponse({
           data: `Se ha enviado código de validación al correo: ${email}`,
@@ -120,27 +128,26 @@ export const userLoginController = async (req: Request, res: Response) => {
     res.json(normalizeResponse({ error }));
   }
 };
-// export const userTokenValidate = async (req: Request, res: Response) => {
-//   try {
-//     // @ts-ignore
-//     const prisma = req.prisma as PrismaClient;
-//     const { email, password } = req?.body;
-//     const user = await getUserByEmail(email, prisma);
-
-//     if (user && user.password && bcrypt.compareSync(password, user.password)) {
-//       sendEmail(email);
-//       return res.json(
-//         normalizeResponse({
-//           data: `Se ha enviado código de validación al correo: ${email}`,
-//         })
-//       );
-//     } else {
-//       throw new Error("Email o contraseña incorrectos");
-//     }
-//   } catch ({ message: error }) {
-//     res.json(normalizeResponse({ error }));
-//   }
-// };
+export const userTokenValidate = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    const { email, authCode } = req?.body;
+    const user = await getUserByEmail(email, prisma);
+    if (user) {
+      if (authCode == user.authToken)
+        return res.json(
+          normalizeResponse({ data: user, token: createJWT(user) })
+        );
+      else
+        return res.json(normalizeResponse({ data: "Token 2fa incorrecto." }));
+    } else {
+      throw new Error("Email incorrecto");
+    }
+  } catch ({ message: error }) {
+    res.json(normalizeResponse({ error }));
+  }
+};
 
 export const userWalletController = async (req: Request, res: Response) => {
   try {

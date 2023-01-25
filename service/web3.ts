@@ -1,4 +1,4 @@
-// import { ethers } from "ethers";
+import { ethers } from "ethers";
 // import { CONTRACT_ABI, CONTRACT_ADDRESS } from "../utils/const";
 // const provider = new ethers.providers.JsonRpcProvider(
 //   process.env.PROVIDER as string
@@ -14,3 +14,17 @@
 // // console.log("🚀 ~ file: web3.ts ~ line 10 ~ contract", contract)
 
 // export default contractWithSigner;
+export async function createWallet(password: string) {
+  try {
+    const wallet = ethers.Wallet.createRandom(password);
+    return wallet;
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function manageKeys(password: string) {
+  try {
+  } catch (e) {
+    console.log(e);
+  }
+}

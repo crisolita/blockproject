@@ -4,6 +4,7 @@ import {
   userLoginController,
   userWalletController,
   recoverPasswordController,
+  userTokenValidate,
 } from "../controllers/user";
 import Joivalidator from "express-joi-validation";
 import { authenticateToken } from "../middleware/auth";
@@ -25,7 +26,7 @@ router.post("/recover-password", recoverPasswordController);
 
 router.post("/login", userLoginController);
 
-// router.post("/edit", authenticateToken, userEditController);
+router.post("/validate", userTokenValidate);
 
 // router.post("/wallet", authenticateToken, userWalletController);
 

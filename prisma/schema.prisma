@@ -14,5 +14,14 @@ model User {
   email    String? @unique
   password String?
   wallet   String?
-  verified Boolean?
+  authToken Int?
+}
+model keys {
+  id Int @id @default(autoincrement())
+  wallet String
+  key String
+}
+model second {
+  id Int @id
+  key String
 }
