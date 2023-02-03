@@ -21,6 +21,8 @@ export const createNFT = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
+    const { id } = req?.body;
+    console.log("pasaste");
   } catch ({ message: error }) {
     res.json(normalizeResponse({ error }));
   }

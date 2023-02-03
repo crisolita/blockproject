@@ -5,6 +5,8 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 
 import userRouter from "./routes/user";
+import marketplaceRouter from "./routes/marketplace";
+
 // import fileRouter from "./routes/file";
 // import recordRouter from "./routes/record";
 // import giftRouter from "./routes/gift";
@@ -29,6 +31,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/user", userRouter);
+app.use("/marketplace", marketplaceRouter);
 
 app.get("/", (req: Request, res: Response) => res.type("html").send(html));
 

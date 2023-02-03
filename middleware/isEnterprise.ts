@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_PRIVATE_KEY } from "../utils/utils";
 
-export function isAdmin(req: Request, res: Response, next: NextFunction) {
+export function isEnterprise(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -15,7 +15,7 @@ export function isAdmin(req: Request, res: Response, next: NextFunction) {
 
     // @ts-ignore
     req.user = user;
-    if (user.email !== "admin@mail.com") return res.sendStatus(403);
+    if (user.typeOfUser !== "EMPRESA") return res.sendStatus(403);
 
     next();
   });
