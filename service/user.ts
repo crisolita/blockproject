@@ -35,19 +35,6 @@ export const updateUser = async (
   });
 };
 
-export const updateUserWalletAddress = async (
-  id: string,
-  wallet: string,
-  prisma: PrismaClient
-) => {
-  return await prisma.user.update({
-    where: { id: Number(id) },
-    data: {
-      wallet,
-    },
-  });
-};
-
 export const updateUserBalance = async (
   id: string,
   balance: number,
@@ -62,7 +49,7 @@ export const updateUserBalance = async (
 };
 export const updateUserAuthToken = async (
   id: string,
-  authToken: number,
+  authToken: string,
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({

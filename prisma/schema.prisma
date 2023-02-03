@@ -8,20 +8,19 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  fullName String
-  balance  Int?
-  email    String? @unique
-  password String?
-  wallet   String?
-  authToken Int?
+  id         Int     @id @default(autoincrement())
+  fullName   String
+  balance    Int?
+  email      String? @unique
+  password   String?
+  wallet     String?
+  authToken  String?
+  typeOfUser String
 }
+
 model keys {
-  id Int @id @default(autoincrement())
-  wallet String
-  key String
-}
-model second {
-  id Int @id
-  key String
+  id     Int     @id @default(autoincrement())
+  wallet String?
+  key    String?
+  second String?
 }
