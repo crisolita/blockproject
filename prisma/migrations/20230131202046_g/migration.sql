@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "keys" ALTER COLUMN "wallet" DROP NOT NULL,
-ALTER COLUMN "key" DROP NOT NULL;

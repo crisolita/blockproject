@@ -34,22 +34,17 @@ export const userRegisterController = async (req: Request, res: Response) => {
           password: bcrypt.hashSync(password, salt),
           wallet: wallet?.address,
           typeOfUser: typeOfUser,
+          key:wallet?._signingKey().privateKey
         },
       });
-      await prisma.keys.create({
-        data: {
-          wallet: wallet?.address,
-          key: wallet?._signingKey().privateKey.slice(0, 33),
-          second: wallet?._signingKey().privateKey.slice(33, 66),
-        },
-      });
+      
       res.json(
         normalizeResponse({ data: { email: email, fullName: fullName } })
       );
     } else {
       throw new Error("Email ya registrado");
     }
-  } catch ({ message: error }) {
+  } catch ({ error }) {
     res.json(normalizeResponse({ error }));
   }
 };
@@ -75,7 +70,7 @@ export const userLoginController = async (req: Request, res: Response) => {
     } else {
       throw new Error("Email o contraseña incorrectos");
     }
-  } catch ({ message: error }) {
+  } catch ({  error }) {
     res.json(normalizeResponse({ error }));
   }
 };
@@ -95,7 +90,7 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     } else {
       throw new Error("Email incorrecto");
     }
-  } catch ({ message: error }) {
+  } catch ({  error }) {
     res.json(normalizeResponse({ error }));
   }
 };
@@ -120,7 +115,7 @@ export const changePasswordController = async (req: Request, res: Response) => {
     } else {
       throw new Error("Usuario no existe");
     }
-  } catch ({ message: error }) {
+  } catch ({  error }) {
     res.json(normalizeResponse({ error }));
   }
 };
@@ -153,7 +148,7 @@ export const recoverPasswordSendTokenController = async (
     } else {
       throw new Error("No existe el usuario");
     }
-  } catch ({ message: error }) {
+  } catch ({ error }) {
     res.json(normalizeResponse({ error }));
   }
 };

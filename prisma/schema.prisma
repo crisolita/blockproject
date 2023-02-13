@@ -7,6 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model orders {
+  id       Int  @id @default(autoincrement())
+  User_id   Int
+  nftId    Int
+  price    Int
+  cantidad Int
+  User   User   @relation(fields: [User_id], references: [id])
+  Nfts     Nfts @relation(fields: [nftId], references: [id])
+}
+
+model Nfts {
+  User_id   Int?
+  id        Int      @id @unique
+  nombre    String
+  cantidad  Int
+  royalty   Int
+  imageIpfs String
+  User      User?    @relation(fields: [User_id], references: [id])
+  Orders    orders[]
+}
+
 model User {
   id         Int     @id @default(autoincrement())
   fullName   String
@@ -16,11 +37,7 @@ model User {
   wallet     String?
   authToken  String?
   typeOfUser String
-}
-
-model keys {
-  id     Int     @id @default(autoincrement())
-  wallet String?
-  key    String?
-  second String?
+  key        String?
+  Nfts       Nfts[]
+  Orders     orders[]
 }

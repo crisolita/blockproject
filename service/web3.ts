@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "../utils/const";
-const provider = new ethers.providers.JsonRpcProvider(
+export const provider = new ethers.providers.JsonRpcProvider(
   process.env.PROVIDER as string
 );
 // const wallet = new ethers.Wallet(process.env.PRIVATEKEY as string, provider);

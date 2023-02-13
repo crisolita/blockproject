@@ -7,10 +7,6 @@ import { PrismaClient } from "@prisma/client";
 import userRouter from "./routes/user";
 import marketplaceRouter from "./routes/marketplace";
 
-// import fileRouter from "./routes/file";
-// import recordRouter from "./routes/record";
-// import giftRouter from "./routes/gift";
-// import web3Router from "./routes/web3";
 import bodyParser from "body-parser";
 
 dotenv.config();

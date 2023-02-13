@@ -7,3 +7,9 @@ export const querySchemaRegistro = Joi.object({
     .required(),
   typeOfUser: Joi.string().required(),
 });
+export const querySchemaCreateNFT = Joi.object({
+  nombre: Joi.string().required(),
+  userId: Joi.string().required(),
+  cantidad: Joi.number().required(),
+  imageIpfs:Joi.string().required()
+});
