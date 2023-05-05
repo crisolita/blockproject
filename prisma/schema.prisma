@@ -13,6 +13,8 @@ model orders {
   nftId    Int
   price    Int
   cantidad Int
+  active Boolean?
+  txHash String?
   User   User   @relation(fields: [User_id], references: [id])
   Nfts     Nfts @relation(fields: [nftId], references: [id])
 }

@@ -5,6 +5,8 @@ export const provider = new ethers.providers.JsonRpcProvider(
 );
 // const wallet = new ethers.Wallet(process.env.PRIVATEKEY as string, provider);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+export const wallet = new ethers.Wallet(process.env.ADMINPRIVATEKEY as string, provider);
+
 export default contract;
 export async function createWallet(password: string) {
   try {
