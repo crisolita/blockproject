@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "../utils/const";
+import { Magic } from '@magic-sdk/admin';
 export const provider = new ethers.providers.JsonRpcProvider(
   process.env.PROVIDER as string
 );
@@ -7,6 +8,9 @@ export const provider = new ethers.providers.JsonRpcProvider(
 const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
 export const wallet = new ethers.Wallet(process.env.ADMINPRIVATEKEY as string, provider);
 
+export async function magicProof() {
+  const mAdmin = new Magic(process.env.SECRET_API_KEY as string); // ✨
+}
 export default contract;
 export async function createWallet(password: string) {
   try {

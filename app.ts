@@ -6,6 +6,10 @@ import { PrismaClient } from "@prisma/client";
 
 import userRouter from "./routes/user";
 import marketplaceRouter from "./routes/marketplace";
+import stripeRouter from "./routes/stripe";
+import eventosRouter from "./routes/eventos";
+
+
 
 import bodyParser from "body-parser";
 
@@ -28,6 +32,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
+app.use("/stripe", stripeRouter);
+app.use("/eventos", eventosRouter);
+
+
+app.use((err:any, req:any, res:any, next:any) => {
+  if (err && err.error && err.error.isJoi) {
+    // we had a joi error, let's return a custom 400 json response
+    const cadena = err.error.details[0].message
+    console.log(cadena)
+    const i= cadena.indexOf("")
+    console.log(cadena.slice(1,i))
+    res.status(400).json({
+      error: err.error.details[0].message
+    });
+  } else {
+    // pass on to another error handler
+    next(err);
+  }
+});
 
 app.get("/", (req: Request, res: Response) => res.type("html").send(html));
 

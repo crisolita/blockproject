@@ -1,7 +1,7 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { createJWT, normalizeResponse } from "../utils/utils";
+import { createJWT } from "../utils/utils";
 import {
   getAllUsers,
   getUserByEmail,
@@ -10,68 +10,80 @@ import {
   updateUserAuthToken,
 } from "../service/user";
 import { sendEmail } from "../service/mail";
-import { createWallet, manageKeys } from "../service/web3";
-import { string } from "joi";
+import { createWallet } from "../service/web3";
+import CryptoJS from "crypto-js";
+const stripe = require('stripe')(process.env.SK_TEST);
+
 
 export const convertFullName = (str: string) =>
-  str.split(", ").reverse().join(" ");
+str.split(", ").reverse().join(" ");
 const compareStrings = (str1: string, str2: string) =>
-  str1?.toLowerCase().trim() === str2?.toLowerCase().trim();
+str1?.toLowerCase().trim() === str2?.toLowerCase().trim();
 
 export const userRegisterController = async (req: Request, res: Response) => {
   try {
     const salt = bcrypt.genSaltSync();
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
-    const { email, fullName, password, typeOfUser } = req?.body;
+    const accounts = await stripe.accounts.list({
+      limit: 3,
+    });
+    console.log(accounts.data)
+    const { email, first_name,last_name, password, typeOfUser,country } = req?.body;
     const user = await getUserByEmail(email, prisma);
-    if (!user) {
-      const wallet = await createWallet(bcrypt.hashSync(password, salt));
+    const wallet = await createWallet(bcrypt.hashSync(password, salt));
+    if (!user && wallet && process.env.SECRETKEY) {
+      const key= CryptoJS.AES.encrypt(wallet._signingKey().privateKey,process.env.SECRETKEY).toString()
+
       await prisma.user.create({
         data: {
           email: email,
-          fullName: fullName,
+          first_name: first_name,
+          last_name:last_name,
           password: bcrypt.hashSync(password, salt),
           wallet: wallet?.address,
-          typeOfUser: typeOfUser,
-          key:wallet?._signingKey().privateKey
+          key:key,
+          typeOfUser: typeOfUser
         },
       });
       
       res.json(
-        normalizeResponse({ data: { email: email, fullName: fullName } })
+        { data: { email: email, first_name,last_name,wallet,typeOfUser} }
       );
     } else {
-      throw new Error("Email ya registrado");
+      res.json({error:"Email ya registrado"})
     }
-  } catch ({ error }) {
-    res.json(normalizeResponse({ error }));
+  } catch (error ) {
+    console.log(error)
+    res.json({ error });
   }
 };
 
-let authCode = JSON.stringify(
-  Math.round(Math.random() * (999999 - 100000) + 100000)
-);
+
 export const userLoginController = async (req: Request, res: Response) => {
   try {
+    let authCode = JSON.stringify(
+      Math.round(Math.random() * (999999 - 100000) + 100000)
+    );
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
     const { email, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
+    const salt = bcrypt.genSaltSync();
 
     if (user && user.password && bcrypt.compareSync(password, user.password)) {
       await sendEmail(email, authCode);
-      await updateUserAuthToken(user.id.toString(), authCode, prisma);
+      await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), prisma);
       return res.json(
-        normalizeResponse({
+        {
           data: `Se ha enviado código de validación al correo: ${email}`,
-        })
+        }
       );
     } else {
-      throw new Error("Email o contraseña incorrectos");
+      res.status(404).json({error:"Email o contraseña incorrectos"});
     }
-  } catch ({  error }) {
-    res.json(normalizeResponse({ error }));
+  } catch (error ) {
+    res.json({ error });
   }
 };
 export const userTokenValidate = async (req: Request, res: Response) => {
@@ -81,17 +93,17 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     const { email, authCode } = req?.body;
     const user = await getUserByEmail(email, prisma);
     if (user) {
-      if (authCode == user.authToken)
+      if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
         return res.json(
-          normalizeResponse({ data: user, token: createJWT(user) })
-        );
+          { data: user, token: createJWT(user) })
+        ;
       else
-        return res.json(normalizeResponse({ data: "Token 2fa incorrecto." }));
+        return res.json({ data: "Token 2fa incorrecto." });
     } else {
       throw new Error("Email incorrecto");
     }
-  } catch ({  error }) {
-    res.json(normalizeResponse({ error }));
+  } catch (error ) {
+    res.json({ error });
   }
 };
 export const changePasswordController = async (req: Request, res: Response) => {
@@ -105,18 +117,19 @@ export const changePasswordController = async (req: Request, res: Response) => {
       if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : "")) {
         const salt = bcrypt.genSaltSync();
         updateUser(
-          user.id.toString(),
+          user.id,
           { password: bcrypt.hashSync(newPassword, salt) },
           prisma
         );
-        return res.json(normalizeResponse({ data: user }));
+        return res.json({ data: user });
       } else
-        return res.json(normalizeResponse({ data: "Token 2fa incorrecto." }));
+        return res.json({ data: "Token 2fa incorrecto." });
     } else {
-      throw new Error("Usuario no existe");
+      res.json({error:"Usuario no existe"});
     }
-  } catch ({  error }) {
-    res.json(normalizeResponse({ error }));
+  } catch (error ) {
+    console.log(error)
+    res.json({ error });
   }
 };
 export const recoverPasswordSendTokenController = async (
@@ -124,6 +137,7 @@ export const recoverPasswordSendTokenController = async (
   res: Response
 ) => {
   try {
+    
     let authCode = JSON.stringify(
       Math.round(Math.random() * (999999 - 100000) + 100000)
     );
@@ -141,14 +155,14 @@ export const recoverPasswordSendTokenController = async (
         prisma
       );
       return res.json(
-        normalizeResponse({
+        {
           data: `Se ha enviado código de validación al correo: ${email}`,
-        })
+        }
       );
     } else {
       throw new Error("No existe el usuario");
     }
-  } catch ({ error }) {
-    res.json(normalizeResponse({ error }));
+  } catch (error ) {
+    res.json({ error });
   }
 };

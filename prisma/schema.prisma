@@ -8,15 +8,16 @@ datasource db {
 }
 
 model orders {
-  id       Int  @id @default(autoincrement())
-  User_id   Int
+  id       Int      @id @default(autoincrement())
+  sellerID Int
+  buyerId  Int?
   nftId    Int
   price    Int
   cantidad Int
-  active Boolean?
-  txHash String?
-  User   User   @relation(fields: [User_id], references: [id])
-  Nfts     Nfts @relation(fields: [nftId], references: [id])
+  active   Boolean?
+  txHash   String?
+  User     User     @relation(fields: [sellerID], references: [id])
+  Nfts     Nfts     @relation(fields: [nftId], references: [id])
 }
 
 model Nfts {
@@ -26,20 +27,61 @@ model Nfts {
   cantidad  Int
   royalty   Int
   imageIpfs String
+  txHash    String?
   User      User?    @relation(fields: [User_id], references: [id])
   Orders    orders[]
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  fullName   String
-  balance    Int?
-  email      String? @unique
-  password   String?
-  wallet     String?
-  authToken  String?
-  typeOfUser String
-  key        String?
-  Nfts       Nfts[]
-  Orders     orders[]
+  id           Int       @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  balance      Int?
+  email        String?   @unique
+  password     String?
+  wallet       String    @unique
+  key          String
+  authToken    String?
+  typeOfUser   String
+  acctStpId    String?
+  clientSecret String?
+  Nfts         Nfts[]
+  Orders       orders[]
+  Eventos      Eventos[]
+  Entrada      Entrada[]
+}
+
+/// Validar los tipos para la fecha, para los urls de la imagenes
+model Eventos {
+  id            Int       @id @default(autoincrement())
+  creator_id    Int
+  name          String
+  place         String
+  date          DateTime
+  modal         Modales?
+  profile_image String?
+  banner_image  String?
+  instagram     String?
+  twitter       String?
+  facebook      String?
+  User          User?     @relation(fields: [creator_id], references: [id])
+  Entrada       Entrada[]
+}
+
+model Entrada {
+  id        Int      @id @default(autoincrement())
+  qrCode    String?
+  user_id   Int
+  evento_id Int
+  create_at DateTime
+  expire_at DateTime
+  valid_at DateTime
+  User      User?    @relation(fields: [user_id], references: [id])
+  Evento    Eventos? @relation(fields: [evento_id], references: [id])
+}
+
+enum Modales {
+  Thriatlon
+  diez_km
+  cinco_km
 }

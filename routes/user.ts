@@ -7,7 +7,7 @@ import {
   changePasswordController,
 } from "../controllers/user";
 import Joivalidator from "express-joi-validation";
-import { querySchemaRegistro } from "../middleware/validation";
+import { querySchemaChangePassword, querySchemaLogin, querySchemaRegistro, querySchemaSendToken, querySchemaValidate } from "../middleware/validation";
 const validator = Joivalidator.createValidator();
 
 const router = express.Router();
@@ -20,14 +20,13 @@ router.post(
   userRegisterController
 );
 
-router.post("/recover-password-sendToken", recoverPasswordSendTokenController);
+router.post("/recover-password-sendToken",validator.body(querySchemaSendToken), recoverPasswordSendTokenController);
 
-router.post("/recover-password-changePassword", changePasswordController);
+router.post("/recover-password-changePassword",validator.body(querySchemaChangePassword), changePasswordController);
 
-router.post("/login", userLoginController);
+router.post("/login",validator.body(querySchemaLogin), userLoginController);
 
-router.post("/validate", userTokenValidate);
+router.post("/validate",validator.body(querySchemaValidate), userTokenValidate);
 
-// router.post("/buyNFT", authenticateToken, userWalletController);
 
 export default router;
