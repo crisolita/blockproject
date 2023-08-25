@@ -1,4 +1,4 @@
-import contract from "../NFT1155.json";
+import contract from "../NFTSPORT.json";
 
 export const CONTRACT_ABI = contract.abi;
 export const CONTRACT_ADDRESS =

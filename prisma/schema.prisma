@@ -11,25 +11,28 @@ model orders {
   id       Int      @id @default(autoincrement())
   sellerID Int
   buyerId  Int?
-  nftId    Int
+  nftId    Int  
   price    Int
-  cantidad Int
+  eventoId Int?
   active   Boolean?
   txHash   String?
+  createdAt DateTime
+  completedAt DateTime?
+  Evento   Eventos? @relation(fields: [eventoId], references: [id])
   User     User     @relation(fields: [sellerID], references: [id])
   Nfts     Nfts     @relation(fields: [nftId], references: [id])
 }
 
+
 model Nfts {
-  User_id   Int?
-  id        Int      @id @unique
-  nombre    String
-  cantidad  Int
-  royalty   Int
-  imageIpfs String
-  txHash    String?
-  User      User?    @relation(fields: [User_id], references: [id])
-  Orders    orders[]
+  User_id  Int?
+  id       Int         @id @unique
+  tipo     TicketTime?
+  eventoId Int
+  txHash   String?
+  Evento   Eventos?    @relation(fields: [eventoId], references: [id])
+  User     User?       @relation(fields: [User_id], references: [id])
+  Orders   orders[]
 }
 
 model User {
@@ -37,7 +40,7 @@ model User {
   first_name   String
   last_name    String
   balance      Int?
-  email        String?   @unique
+  email        String  @unique
   password     String?
   wallet       String    @unique
   key          String
@@ -55,27 +58,33 @@ model User {
 model Eventos {
   id            Int       @id @default(autoincrement())
   creator_id    Int
-  name          String
-  place         String
-  date          DateTime
-  modal         Modales?
+  name          String?
+  place         String?
+  date          DateTime?
+  distancia     Int?
+  modalidad     Modales?
   profile_image String?
   banner_image  String?
   instagram     String?
   twitter       String?
   facebook      String?
+  Nfts          Nfts[]
   User          User?     @relation(fields: [creator_id], references: [id])
   Entrada       Entrada[]
+  orders        orders[]
 }
 
 model Entrada {
   id        Int      @id @default(autoincrement())
-  qrCode    String?
+  qrCode    String? @unique
   user_id   Int
   evento_id Int
   create_at DateTime
   expire_at DateTime
-  valid_at DateTime
+  valid_start  DateTime
+  nftId     Int @unique
+  used      Boolean?
+  burnHash  String?
   User      User?    @relation(fields: [user_id], references: [id])
   Evento    Eventos? @relation(fields: [evento_id], references: [id])
 }
@@ -84,4 +93,9 @@ enum Modales {
   Thriatlon
   diez_km
   cinco_km
+}
+
+enum TicketTime {
+  Entrada
+  Cupon
 }

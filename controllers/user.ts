@@ -3,9 +3,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { createJWT } from "../utils/utils";
 import {
-  getAllUsers,
   getUserByEmail,
-  getUserById,
   updateUser,
   updateUserAuthToken,
 } from "../service/user";
@@ -17,8 +15,7 @@ const stripe = require('stripe')(process.env.SK_TEST);
 
 export const convertFullName = (str: string) =>
 str.split(", ").reverse().join(" ");
-const compareStrings = (str1: string, str2: string) =>
-str1?.toLowerCase().trim() === str2?.toLowerCase().trim();
+
 
 export const userRegisterController = async (req: Request, res: Response) => {
   try {

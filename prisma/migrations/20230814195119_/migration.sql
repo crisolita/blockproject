@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Eventos" ALTER COLUMN "date" SET DATA TYPE TEXT;

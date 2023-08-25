@@ -8,6 +8,8 @@ import userRouter from "./routes/user";
 import marketplaceRouter from "./routes/marketplace";
 import stripeRouter from "./routes/stripe";
 import eventosRouter from "./routes/eventos";
+import entradasRouter from "./routes/entradas";
+
 
 
 
@@ -34,6 +36,8 @@ app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);
 app.use("/eventos", eventosRouter);
+app.use("/entradas", entradasRouter);
+
 
 
 app.use((err:any, req:any, res:any, next:any) => {

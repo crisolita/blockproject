@@ -24,9 +24,9 @@ router.post("/recover-password-sendToken",validator.body(querySchemaSendToken), 
 
 router.post("/recover-password-changePassword",validator.body(querySchemaChangePassword), changePasswordController);
 
-router.post("/login",validator.body(querySchemaLogin), userLoginController);
+router.put("/login",validator.body(querySchemaLogin), userLoginController);
 
-router.post("/validate",validator.body(querySchemaValidate), userTokenValidate);
+router.put("/validate",validator.body(querySchemaValidate), userTokenValidate);
 
 
 export default router;
