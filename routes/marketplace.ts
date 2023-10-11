@@ -1,7 +1,7 @@
 import express from "express";
 import {  buyNFT, createAndSellNFT,  sellNFT } from "../controllers/marketplace";
 import { authenticateToken } from "../middleware/auth";
-import { isEnterprise } from "../middleware/isEnterprise";
+import { isEnterprise } from "../middleware/isOrganizador";
 
 const router = express.Router();
 // RECUERDA PONER LOS VALIDADORES DE JOI

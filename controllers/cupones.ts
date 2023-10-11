@@ -128,3 +128,18 @@ export const validarEntrada = async (req: Request, res: Response) => {
   }
 };
 
+export const crearCupons = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const {} = req?.body;
+    const user=await getUserById(USER.id,prisma);
+  
+    return res.json({data:{}})
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};

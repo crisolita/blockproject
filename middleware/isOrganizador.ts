@@ -18,7 +18,7 @@ export function isEnterprise(req: Request, res: Response, next: NextFunction) {
     req.user = user;
     const user2= await getUserByEmail(user.email,prisma);
 
-    if (user2?.typeOfUser !== "EMPRESA") return res.sendStatus(403);
+    if (user2?.user_rol !== "ORGANIZADOR") return res.sendStatus(403);
     next();
   });
 }
