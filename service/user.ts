@@ -1,8 +1,8 @@
 import { PrismaClient, ROL } from "@prisma/client";
 
-export const getUserById = async (id: string, prisma: PrismaClient) => {
+export const getUserById = async (id: number, prisma: PrismaClient) => {
   return await prisma.user.findUnique({
-    where: { id: Number(id) },
+    where: { id: id },
   });
 };
 
@@ -24,7 +24,7 @@ export const getUserByEmail = async (email: string, prisma: PrismaClient) => {
 
 export const updateUser = async (
   id: number,
-  data: { email?: string; password?: string, acctStpId?:string, clientSecret?:string},
+  data: { email?: string; password?: string, acctStpId?:string, clientSecret?:string,company_name?:string,company_cif?:string},
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({

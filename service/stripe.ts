@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { getUserById } from "./user";
+import { LargeNumberLike } from "crypto";
 const stripe = require('stripe')(process.env.SK_TEST);
 
 export const createTransfer = async (receiverAccountId:string,amount:string,description:string, prisma: PrismaClient) => {
@@ -10,7 +11,7 @@ export const createTransfer = async (receiverAccountId:string,amount:string,desc
     description:description,
   });
   };
-  export const createCharge = async (user_id:string,receiverAccountId:string,cardNumber:string, exp_month:string,exp_year:string,cvc:string, amount:string,prisma: PrismaClient) => {
+  export const createCharge = async (user_id:number,receiverAccountId:string,cardNumber:string, exp_month:string,exp_year:string,cvc:string, amount:string,prisma: PrismaClient) => {
     try {
       const user= await getUserById(user_id,prisma)
       const customer = await stripe.customers.create({description:`${user_id}`

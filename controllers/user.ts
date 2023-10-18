@@ -6,6 +6,7 @@ import {
   createUser,
   getUserByEmail,
   getUserByGoogleID,
+  getUserById,
   updateUser,
   updateUserAuthToken,
 } from "../service/user";
@@ -185,6 +186,31 @@ export const userGoogleController = async (req: Request, res: Response) => {
       res.status(200).json({email:exist.email,userid:exist.id,wallet:exist.wallet,  token: createJWT(exist)});
     }    
       } catch ( error ) {
+    console.log(error)
+    res.status(500).json({error:error})
+  }
+};
+export const userRequestOrganizador = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const {company_cif,company_name}=req.body
+    const user= await getUserById(USER.id,prisma)
+    if(!user) return res.status(404).json({error:"Usuario no encontrado"})
+    if(user.user_rol=="ORGANIZADOR") return res.status(400).json({error:"Usuario ya es organizador"})
+    const requestOrganizador= await prisma.requestOrganizador.findUnique({where:{user_id:USER.id}})
+    if(requestOrganizador?.status=="PENDIENTE" || requestOrganizador?.status=="APROBADO" ) return res.status(400).json({error:"Ya existe la peticion"})
+    await prisma.requestOrganizador.create({
+      data:{
+        user_id:user.id,
+        status:"PENDIENTE"
+      }
+    })
+    const update=await updateUser(USER.id,{company_cif,company_name},prisma)
+    res.json(update)
+  } catch ( error ) {
     console.log(error)
     res.status(500).json({error:error})
   }

@@ -54,11 +54,11 @@ export const buyNFT = async (req: Request, res: Response) => {
     console.log(order)
     if(order?.buyerId || order?.completedAt || !order?.active || order.sellerID==buyer?.id) return res.json({error:"Order esta completa"})
     if(buyer && buyer.wallet) {
-      const seller= await getUserById(`${order?.sellerID}`,prisma)
+      const seller= await getUserById(order?.sellerID,prisma)
       //VALIDAR EL PAGO
       //  Hacer transferFrom 
       if(seller && seller.acctStpId && buyer.id) {
-        const charge=await createCharge(buyer.id.toString(),seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(order.price*100).toString(),prisma)
+        const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(order.price*100).toString(),prisma)
         if(!charge) return res.json({error:"PAgo con tarjeta ha fallado"})
         const transferFrom= await contract.connect(wallet).functions.transferFrom(seller.wallet,buyer.wallet,order.nftId)
         await prisma.orders.update({
