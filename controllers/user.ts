@@ -32,7 +32,7 @@ export const userRegisterController = async (req: Request, res: Response) => {
     const wallet = await createWallet(bcrypt.hashSync(password, salt));
     if (!user && wallet && process.env.SECRETKEY) {
       const key= CryptoJS.AES.encrypt(wallet._signingKey().privateKey,process.env.SECRETKEY).toString()
-      const user= await createUser({email,first_name,last_name,password:bcrypt.hashSync(password, salt),user_rol:"DEPORTISTA",birth_date,company_cif,company_name,wallet:wallet?.address,key},prisma)
+      const user= await createUser({email,first_name,last_name,password:bcrypt.hashSync(password, salt),user_rol:"DEPORTISTA",birth_date:birth_date? new Date(birth_date):undefined,company_cif,company_name,wallet:wallet?.address,key},prisma)
       if(user_rol=="ORGANIZADOR") {
         await prisma.requestOrganizador.create({
           data:{
