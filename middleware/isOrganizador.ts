@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { getUserByEmail } from "../service/user";
 import { JWT_PRIVATE_KEY } from "../utils/utils";
 
-export function isEnterprise(req: Request, res: Response, next: NextFunction) {
+export function isOrganizador(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
    // @ts-ignore

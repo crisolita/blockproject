@@ -1,6 +1,5 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth";
-import { isEnterprise } from "../middleware/isOrganizador";
 import {  createVerifySession, onboardLink, webhookControler } from "../controllers/stripe";
 import bodyParser from "body-parser";
 

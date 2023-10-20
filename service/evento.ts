@@ -1,4 +1,4 @@
-import { Modales, PrismaClient } from "@prisma/client";
+import { Modales, PrismaClient, SubCategorias } from "@prisma/client";
 
 export const getEventoById = async (id: number, prisma: PrismaClient) => {
   return await prisma.eventos.findUnique({
@@ -17,5 +17,13 @@ export const updateEvento= async (
     data: {
       ...data,
     },
+  });
+};
+export const createEvento= async (
+  data: {name:string,creator_id: number,subcategoria?:SubCategorias, place?:string,date:Date, modalidad:Modales, profile_image?:string, banner_image?:string,instagram?:string, twitter?:string,facebook?:string,distancia?:number},
+  prisma: PrismaClient
+) => {
+  return await prisma.eventos.create({
+   data:{...data}
   });
 };

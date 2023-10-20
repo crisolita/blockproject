@@ -69,11 +69,12 @@ model RequestOrganizador {
 model Eventos {
   id            Int       @id @default(autoincrement())
   creator_id    Int
-  name          String?
+  name          String
   place         String?
-  date          DateTime?
+  date          DateTime
   distancia     Int?
-  modalidad     Modales?
+  modalidad     Modales
+  subcategoria  SubCategorias?
   profile_image String?
   banner_image  String?
   instagram     String?
@@ -102,8 +103,8 @@ model Entrada {
 
 enum Modales {
   Thriatlon
-  diez_km
-  cinco_km
+  Running
+  Ciclismo
 }
 
 enum TicketTime {
@@ -120,4 +121,17 @@ enum StatusRequest {
   RECHAZADO
   APROBADO
   PENDIENTE
+}
+enum SubCategorias {
+  KM_5
+  KM_10
+  Media_maraton_21km
+  Maraton_42km
+   Sprint
+    Olimpico
+    Half
+    Full
+     Ruta
+    Montanbike_MTB
+    Gravel
 }

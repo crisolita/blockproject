@@ -3,9 +3,10 @@ import { Request, Response } from "express";
 import {
   getUserById,
 } from "../service/user";
-import { getEventoById, updateEvento } from "../service/evento";
+import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import moment from "moment";
 import { getEntradaByEventoID } from "../service/entrada";
+import { uploadImage } from "../service/aws";
 
 
 
@@ -15,38 +16,27 @@ export const createEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const {name, place,date, modalidad, profile_image, banner_image,instagram, twitter,facebook,distancia } = req?.body;
+    const {name, place,date, modalidad, profile_image, banner_image,instagram, twitter,facebook,distancia,subcategoria } = req.body;
     const user= await getUserById(USER.id,prisma);
     if(!moment(date).isValid()) return res.status(400).json({error:"Fecha no valida"})
-    if(user) {
-      await prisma.eventos.create({
-        data:{
-          creator_id:user.id,
-          name:name,
-          place:place,
-          date:date,
-          modalidad:modalidad,
-          distancia:distancia,
-          profile_image:profile_image,
-          banner_image:banner_image,
-          instagram:instagram,
-          twitter:twitter,
-          facebook:facebook
-        }
-      })
-      res.json(({data:{creator_id:user.id,
-        name:name,
-        place:place,
-        date:date,
-        modalidad:modalidad,
-        profile_image:profile_image,
-        banner_image:banner_image,
-        instagram:instagram,
-        twitter:twitter,
-        facebook:facebook}}));
-    } else {
-      res.json({ error: "User not valid" });
+    if(user ) {
+      let event= await createEvento({name,creator_id:user.id, place,date:new Date(date), modalidad,instagram,subcategoria, twitter,facebook,distancia},prisma)
+      if(profile_image) {
+        let pathProfile=`profile_${event.id}`
+        const data= Buffer.from(profile_image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''),'base64')
+        await uploadImage(data,pathProfile)
+        event= await updateEvento(event.id,{profile_image:pathProfile},prisma)
+      } 
+      if (banner_image) {
+        let pathBanner=`banner_${event.id}`
+        const data= Buffer.from(profile_image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''),'base64')
+        await uploadImage(data,pathBanner)
+        event= await updateEvento(event.id,{banner_image:pathBanner},prisma)
 
+      }
+      res.json(event);
+    } else {
+      res.status(400).json({ error: "User not valid" });
     }
   } catch ( error ) {
     console.log(error)
