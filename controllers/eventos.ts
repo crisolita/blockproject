@@ -9,40 +9,66 @@ import { getEntradaByEventoID } from "../service/entrada";
 import { uploadImage } from "../service/aws";
 
 
-
 export const createEvent = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
+    //@ts-ignore
     const prisma = req.prisma as PrismaClient;
-     // @ts-ignore
-     const USER = req.user as User;
-    const {name, place,date, modalidad, profile_image, banner_image,instagram, twitter,facebook,distancia,subcategoria } = req.body;
-    const user= await getUserById(USER.id,prisma);
-    if(!moment(date).isValid()) return res.status(400).json({error:"Fecha no valida"})
-    if(user ) {
-      let event= await createEvento({name,creator_id:user.id, place,date:new Date(date), modalidad,instagram,subcategoria, twitter,facebook,distancia},prisma)
-      if(profile_image) {
-        let pathProfile=`profile_${event.id}`
-        const data= Buffer.from(profile_image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''),'base64')
-        await uploadImage(data,pathProfile)
-        event= await updateEvento(event.id,{profile_image:pathProfile},prisma)
-      } 
-      if (banner_image) {
-        let pathBanner=`banner_${event.id}`
-        const data= Buffer.from(profile_image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''),'base64')
-        await uploadImage(data,pathBanner)
-        event= await updateEvento(event.id,{banner_image:pathBanner},prisma)
+        //@ts-ignore
+    const USER = req.user as User;
+    const { name, place, date, modalidad, profile_image, banner_image, instagram, twitter, facebook, distancia, subcategoria } = req.body;
 
+    const user = await getUserById(USER.id, prisma);
+
+    if (!moment(date).isValid()) {
+      return res.status(400).json({ error: "Fecha no valida" });
+    }
+
+    if (user) {
+      let event = await createEvento({
+        name,
+        creator_id: user.id,
+        place,
+        date: new Date(date),
+        modalidad,
+        instagram,
+        subcategoria,
+        twitter,
+        facebook,
+        distancia,
+      }, prisma);
+
+      if (profile_image) {
+        const pathProfile = `profile_${event.id}`;
+        await handleImageUpload(profile_image, pathProfile);
+        event = await updateEvento(event.id, { profile_image: pathProfile }, prisma);
       }
+
+      if (banner_image) {
+        const pathBanner = `banner_${event.id}`;
+        await handleImageUpload(banner_image, pathBanner);
+        event = await updateEvento(event.id, { banner_image: pathBanner }, prisma);
+      }
+
       res.json(event);
     } else {
       res.status(400).json({ error: "User not valid" });
     }
-  } catch ( error ) {
-    console.log(error)
-    res.json({error });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+const handleImageUpload = async (base64Image: string, path: string) => {
+  const data = Buffer.from(base64Image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''), 'base64');
+  await uploadImage(data, path);
+};
+
+
+
+
+
+
 export const updateEvent = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
