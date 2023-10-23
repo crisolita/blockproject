@@ -5,7 +5,7 @@ import { isOrganizador } from "../middleware/isOrganizador";
 
 const router = express.Router();
 // RECUERDA PONER LOS VALIDADORES DE JOI
-router.post("/createEvent",isOrganizador, createEvent);
+router.post("/createEvent", createEvent);
 router.put("/updateEvent",isOrganizador, updateEvent);
 router.delete("/deleteEvent",isOrganizador, deleteEvent);
 router.get("/", getAll);
