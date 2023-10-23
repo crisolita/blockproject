@@ -19,10 +19,6 @@ export const createEvent = async (req: Request, res: Response) => {
 
     const user = await getUserById(USER.id, prisma);
 
-    if (!moment(date).isValid()) {
-      return res.status(400).json({ error: "Fecha no valida" });
-    }
-
     if (user) {
       let event = await createEvento({
         name,
