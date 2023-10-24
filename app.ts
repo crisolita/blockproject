@@ -32,8 +32,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.prisma = prisma;
   next();
 });
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '20mb',
+parameterLimit: 100000,
+extended: true }));
+app.use(bodyParser.json({ limit: '20mb' }));
 app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);

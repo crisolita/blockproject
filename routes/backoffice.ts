@@ -6,9 +6,9 @@ import { isAdmin } from "../middleware/isAdmin";
 
 const router = express.Router();
 // RECUERDA PONER LOS VALIDADORES DE JOI
-router.post("/setUserRol", isAdmin, updateRolUser);
-// router.post("onboard-user/refresh",authenticateToken,onboardRefresh)
+router.post("/setUserRol", authenticateToken, updateRolUser);
 
+// router.post("onboard-user/refresh",authenticateToken,onboardRefresh)
 
 
 
