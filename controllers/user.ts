@@ -248,7 +248,10 @@ export const userEditProfile = async (req: Request, res: Response) => {
       const profilepath=`profile_user_${update.id}`
     const base64ImageProfile = userprofile?.toString('base64');
 
-   if(base64ImageProfile) await handleImageUpload(base64ImageProfile,profilepath)
+   if(base64ImageProfile) {
+    await handleImageUpload(base64ImageProfile,profilepath)
+    await updateUser(USER.id,{foto_perfil:profilepath},prisma)
+   } 
       res.json({
         user_id:USER.id,
         first_name:update.first_name,
