@@ -36,8 +36,8 @@ export const createEvent = async (req: Request, res: Response) => {
         facebook,
         distancia:Number(distancia),
       }, prisma);
-      const pathProfile = `profile_${event.id}`;
-      const bannerPath=`banner_${event.id}`
+      const pathProfile = `profile_event_${event.id}`;
+      const bannerPath=`banner_event_${event.id}`
     const base64ImageProfile = profile?.toString('base64');
     const base64ImageBanner = banner?.toString('base64');
    if(base64ImageProfile) await handleImageUpload(base64ImageProfile,pathProfile)
