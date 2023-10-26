@@ -246,10 +246,10 @@ export const userEditProfile = async (req: Request, res: Response) => {
       instagram,
       twitter,
       facebook},prisma)
-      const profilepath=`profile_user_${update.id}`
-    const base64ImageProfile = userprofile?.toString('base64');
-
-   if(base64ImageProfile) {
+      
+      if(userprofile) {
+     const profilepath=`profile_user_${update.id}`
+   const base64ImageProfile = userprofile.toString('base64');
     await handleImageUpload(base64ImageProfile,profilepath)
    update= await updateUser(USER.id,{foto_perfil:profilepath},prisma)
    } 

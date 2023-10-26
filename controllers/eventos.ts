@@ -36,15 +36,15 @@ export const createEvent = async (req: Request, res: Response) => {
         facebook,
         distancia:Number(distancia),
       }, prisma);
-      const pathProfile = `profile_event_${event.id}`;
-      const bannerPath=`banner_event_${event.id}`
-    const base64ImageProfile = profile?.toString('base64');
-    const base64ImageBanner = banner?.toString('base64');
-   if(base64ImageProfile) {
-    await handleImageUpload(base64ImageProfile,pathProfile)
-    await updateEvento(event.id,{profile_image:pathProfile},prisma)
-   }
-   if(base64ImageBanner) {
+      if(profile) {
+        const base64ImageProfile = profile.toString('base64');
+        const pathProfile = `profile_event_${event.id}`;
+        await handleImageUpload(base64ImageProfile,pathProfile)
+        await updateEvento(event.id,{profile_image:pathProfile},prisma)
+      }
+      if(banner) {
+     const bannerPath=`banner_event_${event.id}`
+     const base64ImageBanner = banner.toString('base64');
     await handleImageUpload(base64ImageBanner,bannerPath)
     await updateEvento(event.id,{banner_image:bannerPath},prisma)
    }
