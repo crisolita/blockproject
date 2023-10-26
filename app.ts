@@ -14,7 +14,6 @@ import cuponesRouter from "./routes/entradas";
 
 
 
-
 import bodyParser from "body-parser";
 
 dotenv.config();
@@ -32,10 +31,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.prisma = prisma;
   next();
 });
-app.use(bodyParser.urlencoded({ limit: '20mb',
-parameterLimit: 100000,
+app.use(bodyParser.urlencoded({ limit: 1024*1024*10,type:'application/x-www-form-urlencode',
 extended: true }));
-app.use(bodyParser.json({ limit: '20mb' }));
+app.use(bodyParser.json({ limit: 1024*1024*10,type:'application/json',
+ }));
+ app.use(bodyParser.json({ limit:'50mb'
+ }));
 app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);
@@ -43,6 +44,8 @@ app.use("/eventos", eventosRouter);
 app.use("/entradas", entradasRouter);
 app.use("/cupones", cuponesRouter);
 
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 
 

@@ -18,7 +18,11 @@ export const createEvent = async (req: Request, res: Response) => {
     const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria } = req.body;
 
     const user = await getUserById(USER.id, prisma);
-
+    //@ts-ignore
+    const profile = req.files['profile'][0].buffer;
+        //@ts-ignore
+    const banner = req.files['banner'][0].buffer;
+    
     if (user) {
       let event = await createEvento({
         name,
@@ -30,11 +34,14 @@ export const createEvent = async (req: Request, res: Response) => {
         subcategoria,
         twitter,
         facebook,
-        distancia,
+        distancia:Number(distancia),
       }, prisma);
-
-   
-
+      const pathProfile = `profile_${event.id}`;
+      const bannerPath=`banner_${event.id}`
+    const base64ImageProfile = profile?.toString('base64');
+    const base64ImageBanner = banner?.toString('base64');
+   if(base64ImageProfile) await handleImageUpload(base64ImageProfile,'tes1')
+   if(base64ImageBanner) await handleImageUpload(base64ImageBanner,'test2')
       res.json(event);
     } else {
       res.status(400).json({ error: "User not valid" });
@@ -44,50 +51,11 @@ export const createEvent = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-export const addProfileEvent = async (req: Request, res: Response) => {
-  try {
-    //@ts-ignore
-    const prisma = req.prisma as PrismaClient;
-        //@ts-ignore
-    const USER = req.user as User;
-    const { event_id,profile_image } = req.body;
-
-  
-        const pathProfile = `profile_${event_id}`;
-        await handleImageUpload(profile_image, pathProfile);
-       let  event = await updateEvento(event_id, { profile_image: pathProfile }, prisma);
-
-      res.json(event);
-    }
-   catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-export const addBannerEvent = async (req: Request, res: Response) => {
-  try {
-    //@ts-ignore
-    const prisma = req.prisma as PrismaClient;
-        //@ts-ignore
-    const USER = req.user as User;
-    const { event_id,banner_image } = req.body;
-
-  
-        const pathProfile = `profile_${event_id}`;
-        await handleImageUpload(banner_image, pathProfile);
-       let  event = await updateEvento(event_id, { banner_image: pathProfile }, prisma);
-
-      res.json(event);
-    }
-   catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
 
 
 const handleImageUpload = async (base64Image: string, path: string) => {
-  const data = Buffer.from(base64Image.replace(/^data:image\/(png|jpg|jpeg);base64,/, ''), 'base64');
+  const data = Buffer.from(base64Image, 'base64');
+  console.log("VOy a su")
   await uploadImage(data, path);
 };
 
@@ -153,7 +121,7 @@ export const getAll = async (req: Request, res: Response) => {
     const user= await getUserById(USER.id,prisma);
     if(!user) return res.status(404).json({error:"User no valid"})
     const eventos= await prisma.eventos.findMany()
-  
+
    return res.json(eventos)
 
   } catch ( error ) {
