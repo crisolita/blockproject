@@ -154,7 +154,7 @@ export const getAll = async (req: Request, res: Response) => {
     if(!user) return res.status(404).json({error:"User no valid"})
     const eventos= await prisma.eventos.findMany()
   
-   return res.json({data:eventos})
+   return res.json(eventos)
 
   } catch ( error ) {
     console.log(error)
