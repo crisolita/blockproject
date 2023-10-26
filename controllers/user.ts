@@ -236,9 +236,10 @@ export const userEditProfile = async (req: Request, res: Response) => {
       twitter,
       facebook
     } = req?.body;
+    let update;
     const user = await getUserById(USER.id, prisma);
      if(!user) return res.status(404).json({error:"Usuario no encontrado"})
-    const update= await updateUser(USER.id,{first_name,
+     update= await updateUser(USER.id,{first_name,
       last_name,
       descripcion,
       numero_de_licencia,
@@ -250,7 +251,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
 
    if(base64ImageProfile) {
     await handleImageUpload(base64ImageProfile,profilepath)
-    await updateUser(USER.id,{foto_perfil:profilepath},prisma)
+   update= await updateUser(USER.id,{foto_perfil:profilepath},prisma)
    } 
       res.json({
         user_id:USER.id,
