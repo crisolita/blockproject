@@ -94,7 +94,7 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     if (user) {
       if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
         return res.json(
-          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,token: createJWT(user) })
+          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,token: createJWT(user) })
         ;
       else
         return res.status(404).json({ data: "Token 2fa incorrecto." });
