@@ -116,10 +116,7 @@ export const getAll = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
-     // @ts-ignore
-     const USER = req.user as User;
-    const user= await getUserById(USER.id,prisma);
-    if(!user) return res.status(404).json({error:"User no valid"})
+  
     const eventos= await prisma.eventos.findMany()
 
    return res.json(eventos)

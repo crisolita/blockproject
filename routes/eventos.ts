@@ -15,7 +15,7 @@ router.post("/createEvent",upload.fields([{name:'profile',maxCount:1},{name:'ban
 
 router.put("/updateEvent",isOrganizador, updateEvent);
 router.delete("/deleteEvent",isOrganizador, deleteEvent);
-router.get("/",authenticateToken, getAll);
+router.get("/", getAll);
 // router.get("/param", getByParam);
 
 
