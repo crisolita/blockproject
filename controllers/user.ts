@@ -14,6 +14,7 @@ import { sendEmail } from "../service/mail";
 import { createWallet } from "../service/web3";
 import CryptoJS from "crypto-js";
 import axios from "axios";
+import { handleImageUpload } from "./eventos";
 
 const stripe = require('stripe')(process.env.SK_TEST);
 
@@ -225,12 +226,12 @@ export const userEditProfile = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
+    const userprofile = req.file?.buffer;
     const {
       first_name,
       last_name,
       descripcion,
       numero_de_licencia,
-      foto_perfil,
       instagram,
       twitter,
       facebook
@@ -241,10 +242,13 @@ export const userEditProfile = async (req: Request, res: Response) => {
       last_name,
       descripcion,
       numero_de_licencia,
-      foto_perfil,
       instagram,
       twitter,
       facebook},prisma)
+      const profilepath=`profile_user_${update.id}`
+    const base64ImageProfile = userprofile?.toString('base64');
+
+   if(base64ImageProfile) await handleImageUpload(base64ImageProfile,profilepath)
       res.json({
         user_id:USER.id,
         first_name:update.first_name,

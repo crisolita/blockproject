@@ -12,6 +12,11 @@ import {
 import Joivalidator from "express-joi-validation";
 import { querySchemaChangePassword, querySchemaLogin, querySchemaRegistro, querySchemaSendToken, querySchemaValidate } from "../middleware/validation";
 import { authenticateToken } from "../middleware/auth";
+import multer from 'multer';
+
+// Configuración de Multer
+const storage = multer.memoryStorage(); // Almacena la imagen en la memoria, puedes ajustarlo según tus necesidades
+ const upload = multer({ storage: storage });
 const validator = Joivalidator.createValidator();
 
 const router = express.Router();
@@ -33,7 +38,7 @@ router.put("/validate",validator.body(querySchemaValidate), userTokenValidate);
 router.post("/gooogleAuth", userGoogleController);
 router.post("/requestOrganizador",authenticateToken, userRequestOrganizador);
 
-router.put("/editProfile",authenticateToken, userEditProfile);
+router.put("/editProfile",upload.single('userprofile'),authenticateToken, userEditProfile);
 
 
 export default router;

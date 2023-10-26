@@ -40,8 +40,8 @@ export const createEvent = async (req: Request, res: Response) => {
       const bannerPath=`banner_${event.id}`
     const base64ImageProfile = profile?.toString('base64');
     const base64ImageBanner = banner?.toString('base64');
-   if(base64ImageProfile) await handleImageUpload(base64ImageProfile,'tes1')
-   if(base64ImageBanner) await handleImageUpload(base64ImageBanner,'test2')
+   if(base64ImageProfile) await handleImageUpload(base64ImageProfile,pathProfile)
+   if(base64ImageBanner) await handleImageUpload(base64ImageBanner,bannerPath)
       res.json(event);
     } else {
       res.status(400).json({ error: "User not valid" });
@@ -53,7 +53,7 @@ export const createEvent = async (req: Request, res: Response) => {
 };
 
 
-const handleImageUpload = async (base64Image: string, path: string) => {
+export const handleImageUpload = async (base64Image: string, path: string) => {
   const data = Buffer.from(base64Image, 'base64');
   console.log("VOy a su")
   await uploadImage(data, path);
