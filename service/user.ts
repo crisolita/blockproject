@@ -24,7 +24,14 @@ export const getUserByEmail = async (email: string, prisma: PrismaClient) => {
 
 export const updateUser = async (
   id: number,
-  data: { email?: string; password?: string, acctStpId?:string, clientSecret?:string,company_name?:string,company_cif?:string},
+  data: { email?: string; password?: string, acctStpId?:string, clientSecret?:string,company_name?:string,company_cif?:string,first_name?:string,
+    last_name?:string,
+    descripcion?:string,
+    numero_de_licencia?:string,
+    foto_perfil?:string,
+    instagram?:string,
+    twitter?:string,
+    facebook?:string},
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({

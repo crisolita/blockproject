@@ -7,6 +7,7 @@ import {
   changePasswordController,
   userGoogleController,
   userRequestOrganizador,
+  userEditProfile,
 } from "../controllers/user";
 import Joivalidator from "express-joi-validation";
 import { querySchemaChangePassword, querySchemaLogin, querySchemaRegistro, querySchemaSendToken, querySchemaValidate } from "../middleware/validation";
@@ -32,6 +33,7 @@ router.put("/validate",validator.body(querySchemaValidate), userTokenValidate);
 router.post("/gooogleAuth", userGoogleController);
 router.post("/requestOrganizador",authenticateToken, userRequestOrganizador);
 
+router.put("/editProfile",authenticateToken, userEditProfile);
 
 
 export default router;

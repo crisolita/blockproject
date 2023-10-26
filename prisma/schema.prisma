@@ -53,6 +53,12 @@ model User {
   user_rol ROL
   company_name String?
   company_cif String?
+  descripcion String? 
+  numero_de_licencia String?
+  foto_perfil String?
+  instagram String?
+  twitter String?
+  facebook String?
   Nfts         Nfts[]
   Orders       orders[]
   Eventos      Eventos[]

@@ -211,9 +211,53 @@ export const userRequestOrganizador = async (req: Request, res: Response) => {
       }
     })
     const update=await updateUser(USER.id,{company_cif,company_name},prisma)
-    res.json({email:update.email,id:update.id,googleId:update.id,first_name:update.first_name,last_name:update.last_name,user_rol:update.user_rol,birth_date:update.birth_date,company_name:update.company_name,company_cif:update.company_cif})
+    res.json({email:update.email,id:update.id,googleId:update.googleID,first_name:update.first_name,last_name:update.last_name,user_rol:update.user_rol,birth_date:update.birth_date,company_name:update.company_name,company_cif:update.company_cif})
   } catch ( error ) {
     console.log(error)
     res.status(500).json({error:error})
+  }
+};
+
+export const userEditProfile = async (req: Request, res: Response) => {
+  try {
+    const salt = bcrypt.genSaltSync();
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const {
+      first_name,
+      last_name,
+      descripcion,
+      numero_de_licencia,
+      foto_perfil,
+      instagram,
+      twitter,
+      facebook
+    } = req?.body;
+    const user = await getUserById(USER.id, prisma);
+     if(!user) return res.status(404).json({error:"Usuario no encontrado"})
+    const update= await updateUser(USER.id,{first_name,
+      last_name,
+      descripcion,
+      numero_de_licencia,
+      foto_perfil,
+      instagram,
+      twitter,
+      facebook},prisma)
+      res.json({
+        user_id:USER.id,
+        first_name:update.first_name,
+        last_name:update.last_name,
+        descripcion:update.descripcion,
+        numero_de_licencia:update.numero_de_licencia,
+        foto_perfil:update.foto_perfil,
+        instagram:update.instagram,
+        twitter:update.twitter,
+        facebook:update.facebook})
+  }
+  catch (error ) {
+    console.log(error)
+    res.json({ error });
   }
 };
