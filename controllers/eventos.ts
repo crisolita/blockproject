@@ -132,6 +132,20 @@ export const getAll = async (req: Request, res: Response) => {
     res.json({error });
   }
 };
+export const getEvent = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    const {event_id} = req.body;
+    const evento= await getEventoById(event_id,prisma)
+
+   return res.json(evento)
+
+  } catch ( error ) {
+    console.log(error)
+    res.json({error });
+  }
+};
 // export const getByParam = async (req: Request, res: Response) => {
 //   try {
 //     // @ts-ignore
