@@ -34,6 +34,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(bodyParser.urlencoded({ 
 extended: false }));
 
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
 app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);
