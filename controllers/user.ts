@@ -255,6 +255,12 @@ export const userEditProfile = async (req: Request, res: Response) => {
    } 
       res.json({
         user_id:USER.id,
+        email:user.email,
+        googleId:user.googleID,
+        company_cif:user.company_cif,
+        company_name:user.company_name,
+        user_rol:user.user_rol,
+        birth_date:user.birth_date,
         first_name:update.first_name,
         last_name:update.last_name,
         descripcion:update.descripcion,
