@@ -254,7 +254,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
    update= await updateUser(USER.id,{foto_perfil:profilepath},prisma)
    } 
       res.json({
-        user_id:USER.id,
+        id:USER.id,
         email:user.email,
         googleId:user.googleID,
         company_cif:user.company_cif,
