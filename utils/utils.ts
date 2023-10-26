@@ -11,7 +11,7 @@ export const createJWT = (user: any) => {
     },
     JWT_PRIVATE_KEY,
     {
-      expiresIn: "720h",
+      expiresIn: "72h",
     }
   );
 };
