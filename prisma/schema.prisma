@@ -108,7 +108,7 @@ model Entrada {
 }
 
 enum Modales {
-  Thriatlon
+  Triathlon
   Running
   Ciclismo
 }

@@ -4,7 +4,6 @@ import {
   getUserById,
 } from "../service/user";
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
-import moment from "moment";
 import { getEntradaByEventoID } from "../service/entrada";
 import { uploadImage } from "../service/aws";
 

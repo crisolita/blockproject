@@ -35,6 +35,10 @@ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
 app.use("/user", userRouter);
 app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);
