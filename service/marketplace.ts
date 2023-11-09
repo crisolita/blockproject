@@ -7,9 +7,9 @@ export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaC
   if(nft?.User_id===Number(userId) ) return nft;
   };
  
-  export const getNftsById = async (id: string, prisma: PrismaClient) => {
+  export const getNftsById = async (id: number, prisma: PrismaClient) => {
     return await prisma.nfts.findUnique({
-      where: { id: Number(id)},
+      where: { id},
     });
     };
     export const getOrder = async (id: string, prisma: PrismaClient) => {
@@ -25,7 +25,7 @@ export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaC
         {
           return x.active
         })
-        if(actives.length==0) return true
+        if(actives.length==0) return false
         };
 
     

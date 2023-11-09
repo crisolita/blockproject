@@ -102,7 +102,8 @@ export const userTokenValidate = async (req: Request, res: Response) => {
       throw new Error("Email incorrecto");
     }
   } catch (error ) {
-    res.json({ error });
+    console.log(error)
+    res.json( error );
   }
 };
 export const changePasswordController = async (req: Request, res: Response) => {
@@ -275,3 +276,4 @@ export const userEditProfile = async (req: Request, res: Response) => {
     res.json({ error });
   }
 };
+

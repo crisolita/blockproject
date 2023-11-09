@@ -14,39 +14,44 @@ export const createEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
         //@ts-ignore
     const USER = req.user as User;
-    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria } = req.body;
+    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion } = req.body;
 
     const user = await getUserById(USER.id, prisma);
-    //@ts-ignore
-    const profile = req.files['profile'][0].buffer;
-        //@ts-ignore
-    const banner = req.files['banner'][0].buffer;
+  
     
     if (user) {
       let event = await createEvento({
         name,
         creator_id: user.id,
         place,
-        date: new Date(date),
+        date:new Date(date),
         modalidad,
         instagram,
         subcategoria,
         twitter,
         facebook,
+        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
         distancia:Number(distancia),
       }, prisma);
+      if(req.files) {
+          //@ts-ignore
+    const profile = req.files['profile'][0].buffer;
       if(profile) {
         const base64ImageProfile = profile.toString('base64');
         const pathProfile = `profile_event_${event.id}`;
         await handleImageUpload(base64ImageProfile,pathProfile)
         await updateEvento(event.id,{profile_image:pathProfile},prisma)
       }
-      if(banner) {
-     const bannerPath=`banner_event_${event.id}`
-     const base64ImageBanner = banner.toString('base64');
-    await handleImageUpload(base64ImageBanner,bannerPath)
-    await updateEvento(event.id,{banner_image:bannerPath},prisma)
-   }
+              //@ts-ignore
+        const banner = req.files['banner'][0].buffe
+        if(banner) {
+          const bannerPath=`banner_event_${event.id}`
+          const base64ImageBanner = banner.toString('base64');
+         await handleImageUpload(base64ImageBanner,bannerPath)
+         await updateEvento(event.id,{banner_image:bannerPath},prisma)
+        }
+     
+      }
       res.json(event);
     } else {
       res.status(400).json({ error: "User not valid" });
@@ -64,59 +69,90 @@ export const handleImageUpload = async (base64Image: string, path: string) => {
   await uploadImage(data, path);
 };
 
-
-
-
-
-
 export const updateEvent = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
+    //@ts-ignore
     const prisma = req.prisma as PrismaClient;
-     // @ts-ignore
-     const USER = req.user as User;
-    const {data, eventoId } = req?.body;
-    const user= await getUserById(USER.id,prisma);
-    if(!user) return res.status(404).json({error:"User no valid"})
-    const evento= await getEventoById(eventoId,prisma)
-    const entradas= await getEntradaByEventoID(eventoId,prisma)
-    if(entradas) return res.status(400).json({error:"Este evento ya ha vendido entradas"})
-    if(evento && evento.creator_id==user.id) {
-      const updated=await updateEvento(eventoId,data,prisma)
-      return res.json(updated)
-    } else {
-      return res.status(400).json({error:"No event found with creator id"})
-    }
+        //@ts-ignore
+    const USER = req.user as User;
+    const { event_id,name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion } = req.body;
 
-  } catch ( error ) {
-    console.log(error)
-    res.json({error });
+    const user = await getUserById(USER.id, prisma);
+    const event = await getEventoById(event_id,prisma)
+    if(!event) return res.status(404).json({error:"Evento no encontrado"})
+    if (user) {
+      let updated = await updateEvento(event.id,{
+        name,
+        creator_id: user.id,
+        place,
+        date:new Date(date),
+        modalidad,
+        instagram,
+        subcategoria,
+        twitter,
+        facebook,
+        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
+        distancia:Number(distancia),
+      }, prisma);
+      if(req.files) {
+          //@ts-ignore
+    const profile = req.files['profile'][0].buffer;
+      if(profile) {
+        const base64ImageProfile = profile.toString('base64');
+        const pathProfile = `profile_event_${event.id}`;
+        await handleImageUpload(base64ImageProfile,pathProfile)
+        await updateEvento(event.id,{
+          profile_image: pathProfile
+        },prisma)
+      }
+              //@ts-ignore
+        const banner = req.files['banner'][0].buffe
+        if(banner) {
+          const bannerPath=`banner_event_${event.id}`
+          const base64ImageBanner = banner.toString('base64');
+         await handleImageUpload(base64ImageBanner,bannerPath)
+         await updateEvento(event.id,{banner_image:bannerPath},prisma)
+        }
+     
+      }
+      res.json(event);
+    } else {
+      res.status(400).json({ error: "User not valid" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
-export const deleteEvent = async (req: Request, res: Response) => {
-  try {
-    // @ts-ignore
-    const prisma = req.prisma as PrismaClient;
-     // @ts-ignore
-     const USER = req.user as User;
-    const { id } = req?.body;
-    const user= await getUserById(USER.id,prisma);
-    if(!user) return res.status(4040).json({error:"User no valid"})
-    const evento= await getEventoById(id,prisma)
-    const entradas= await getEntradaByEventoID(id,prisma)
-    if(entradas) return res.status(400).json({error:"Este evento ya ha vendido entradas"})
-    if(evento && evento.creator_id==user.id) {
-      const updated=await prisma.eventos.delete({where:{id}})
-      return res.json({data:"OK"})
-    } else {
-      return res.status(400).json({error:"No event found with creator id"})
-    }
 
-  } catch ( error ) {
-    console.log(error)
-    res.json({error });
-  }
-};
+
+
+
+/// arreglar
+// export const deleteEvent = async (req: Request, res: Response) => {
+//   try {
+//     // @ts-ignore
+//     const prisma = req.prisma as PrismaClient;
+//      // @ts-ignore
+//      const USER = req.user as User;
+//     const { id } = req?.body;
+//     const user= await getUserById(USER.id,prisma);
+//     if(!user) return res.status(4040).json({error:"User no valid"})
+//     const evento= await getEventoById(id,prisma)
+//     const entradas= await getEntradaByEventoID(id,prisma)
+//     if(entradas) return res.status(400).json({error:"Este evento ya ha vendido entradas"})
+//     if(evento && evento.creator_id==user.id) {
+//       const updated=await prisma.eventos.delete({where:{id}})
+//       return res.json({data:"OK"})
+//     } else {
+//       return res.status(400).json({error:"No event found with creator id"})
+//     }
+
+//   } catch ( error ) {
+//     console.log(error)
+//     res.json({error });
+//   }
+// };
 export const getAll = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
@@ -145,24 +181,6 @@ export const getEvent = async (req: Request, res: Response) => {
     res.json({error });
   }
 };
-// export const getByParam = async (req: Request, res: Response) => {
-//   try {
-//     // @ts-ignore
-//     const prisma = req.prisma as PrismaClient;
-//      // @ts-ignore
-//      const USER = req.user as User;
-//      const {param, body}=req.params;
-//     const user= await getUserById(USER.id,prisma);
-//     if(!user) return res.status(404).json({error:"User no valid"})
-//     const eventos= await prisma.eventos.findMany({where:{}})
-  
-//    return res.json({data:eventos})
-
-//   } catch ( error ) {
-//     console.log(error)
-//     res.json({error });
-//   }
-// };
 
 
 

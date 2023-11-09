@@ -12,15 +12,21 @@ model orders {
   sellerID Int
   buyerId  Int?
   nftId    Int  
-  price    Int
-  eventoId Int?
+  eventoId Int
   active   Boolean?
   txHash   String?
   createdAt DateTime
   completedAt DateTime?
+  precio_usado Float?
+  precio_batch String
   Evento   Eventos? @relation(fields: [eventoId], references: [id])
   User     User     @relation(fields: [sellerID], references: [id])
   Nfts     Nfts     @relation(fields: [nftId], references: [id])
+}
+
+model MarketplaceConfig {
+id       Int      @id @default(autoincrement())
+royalty  Float?
 }
 
 
@@ -30,6 +36,9 @@ model Nfts {
   tipo     TicketTime?
   eventoId Int
   txHash   String?
+  caducidadVenta DateTime?
+  caducidadCanjeo DateTime?
+  marketplace Boolean?
   Evento   Eventos?    @relation(fields: [eventoId], references: [id])
   User     User?       @relation(fields: [User_id], references: [id])
   Orders   orders[]
@@ -86,6 +95,9 @@ model Eventos {
   instagram     String?
   twitter       String?
   facebook      String?
+  fecha_inicio_venta DateTime?
+  fecha_final_venta DateTime?
+  fecha_asignacion DateTime?
   Nfts          Nfts[]
   User          User?     @relation(fields: [creator_id], references: [id])
   Entrada       Entrada[]
@@ -100,6 +112,7 @@ model Entrada {
   create_at DateTime
   expire_at DateTime
   valid_start  DateTime
+  dorsal    String?
   nftId     Int @unique
   used      Boolean?
   burnHash  String?

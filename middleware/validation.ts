@@ -44,9 +44,40 @@ export const querySchemaSendToken = Joi.object({
   email: Joi.string()
     .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
     .required()});
-export const querySchemaCreateNFT = Joi.object({
-  nombre: Joi.string().required(),
-  userId: Joi.string().required(),
-  cantidad: Joi.number().required(),
-  imageIpfs:Joi.string().required()
+export const querySchemaCreateAndSellNFT = Joi.object({
+  cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
+    precio:Joi.number().required(),
+    fecha_tope:Joi.string().required()
+  })),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean()
+});
+export const querySchemaCreateEvent= Joi.object({
+  name:Joi.string().required(), place:Joi.string().required(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
+  'Running',
+  'Ciclismo').required(), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
+    'KM_10',
+    'Media_maraton_21km',
+    'Maraton_42km',
+     'Sprint',
+      'Olimpico',
+      'Half',
+      'Full',
+       'Ruta',
+      'Montanbike_MTB',
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string()
+});
+export const querySchemaEditEvent= Joi.object({
+ 
+event_id:Joi.number().required(), name:Joi.string(), place:Joi.string(), date:Joi.string(), modalidad:Joi.string().valid('Triathlon',
+  'Running',
+  'Ciclismo'), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
+    'KM_10',
+    'Media_maraton_21km',
+    'Maraton_42km',
+     'Sprint',
+      'Olimpico',
+      'Half',
+      'Full',
+       'Ruta',
+      'Montanbike_MTB',
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string()
 });

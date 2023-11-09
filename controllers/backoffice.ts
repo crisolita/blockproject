@@ -20,3 +20,28 @@ export const updateRolUser= async (req:Request,res: Response) => {
       res.status(500).json({error:e})
     }
     }
+    export const setRoyalty= async (req:Request,res: Response) => {
+      try {
+         // @ts-ignore
+         const prisma = req.prisma as PrismaClient;
+         const {royalty}= req.body;
+         const config= await prisma.marketplaceConfig.findFirst()
+         if(!config) {
+           await prisma.marketplaceConfig.create({
+            data:{
+              royalty
+            }
+           })
+         } else {
+          await prisma.marketplaceConfig.update({where:{id:config.id},
+            data:{
+              royalty
+            }
+           })
+         }
+      return res.json(royalty)
+      } catch (e) {
+        console.log(e)
+        res.status(500).json({error:e})
+      }
+      }

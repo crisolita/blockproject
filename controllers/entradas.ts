@@ -4,15 +4,16 @@ import {
   getUserById,
 } from "../service/user";
 import { getNftsById } from "../service/marketplace";
-import contract from "../service/web3";
+import contract, { wallet } from "../service/web3";
 import moment from "moment";
 import qr from "qrcode"
 import fs from "fs"
-import PDFDocument from "pdfkit"
+import PDFDocument, { dash } from "pdfkit"
 import { sendEntrada } from "../service/mail";
 import { getEntradaByNFTID } from "../service/entrada";
 import { getEventoById } from "../service/evento";
 import CryptoJS from "crypto-js";
+import { createJWTEntrada } from "../utils/utils";
 
 export const canjearNFTporEntada = async (req: Request, res: Response) => {
   try {
@@ -32,7 +33,8 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
 
     if(nft?.tipo!="Entrada" || tokenData[0].tipo!=0 ) return res.json({error:"No es una entrada valida"})
      const evento = await getEventoById(nft?.eventoId,prisma)
-    
+    const now= moment()
+    if(now.isAfter(moment(nft.caducidadCanjeo))) return res.status(400).json({error:"Ha caducido el canjeo de este NFT"})
         //Validar que la entrada no exista con el nft_id
     if(!evento) return res.json({error:"No se ha encontrado el evento"})
     let entrada=await prisma.entrada.create({
@@ -42,7 +44,8 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       create_at: new Date(),
       valid_start:(new Date(moment(evento.date).startOf("day").toString())),
       expire_at:new Date(moment(evento.date).endOf("day").toString()),
-      nftId:nftId
+      nftId:nftId,
+      used:false
   }})
     const eventData = {
       user_id:user?.id,
@@ -87,6 +90,9 @@ qr.toFile('codigo_qr.png', qrData, {
   doc.image('codigo_qr.png', { align: 'center' });
   doc.end();
 });
+const burn= await contract.connect(wallet).functions.burnIt(nftId)
+await prisma.nfts.update({where:{id:nftId},data:{txHash:burn.hash}})
+entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
 await sendEntrada(user.email,path,evento.name)
 fs.unlink(`/Users/crisolcova/blockproject/${path}`, (err) => {
   if (err) {
@@ -95,10 +101,9 @@ fs.unlink(`/Users/crisolcova/blockproject/${path}`, (err) => {
     console.log('Archivo PDF eliminado correctamente.');
   }
 });
-const burn= await contract.functions.burnIt(nftId)
-entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
-return res.json({data:{entrada}})   
+return res.json(entrada)   
   } catch (error) {
+    
     console.log(error)
     res.json({ error:error});
   }
@@ -113,7 +118,7 @@ export const validarEntrada = async (req: Request, res: Response) => {
     const user=await getUserById(USER.id,prisma);
     if(!user) return res.status(404).json({error:"User no valido"})
     let entrada = await prisma.entrada.findUnique({
-      where: { qrCode: qrData, used: false },
+      where: { qrCode: qrData, used: false || null },
     });
     if(!entrada) return res.status(404).json({error:"Entrada no encontrada o utilizada"})
     const now= moment()
@@ -122,11 +127,49 @@ export const validarEntrada = async (req: Request, res: Response) => {
       where: { id: entrada.id },
       data: { used: true },
     });
-    return res.json({data:{entrada,ok:"ok"}})
+    return res.json(entrada)
   } catch (error) {
     console.log(error)
     res.json({ error:error});
   }
 };
 
+export const getEntradas = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const user=await getUserById(USER.id,prisma);
+    if(!user) return res.status(404).json({error:"User no valido"})
+    let data=[]
+    let entradas= await prisma.entrada.findMany()
+    for (let ent of entradas ) {
+      const evento= await getEventoById(ent.evento_id,prisma)
+      if(evento?.creator_id==USER.id && !ent.used) data.push(ent)
+    }
+    return res.json(data)
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};
+export const asignarDorsal = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+     const {dorsal_number,entrada_id}=req.body;
+    const user=await getUserById(USER.id,prisma);
+    if(!user) return res.status(404).json({error:"User no valido"})
+    let entrada= await prisma.entrada.findUnique({where:{id:entrada_id}})
+  if(!entrada || entrada.used) return res.status(404).json({error:"Entrada usada o inexistente"})
+    entrada= await prisma.entrada.update({where:{id:entrada_id},data:{dorsal:dorsal_number}})
+  return res.json(entrada)
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};
 

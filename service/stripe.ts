@@ -34,6 +34,7 @@ export const createTransfer = async (receiverAccountId:string,amount:string,desc
           currency: 'usd',
           payment_method:paymentMethod.id,
           confirm:true,
+          application_fee_amount:'10',
           customer:customer.id,
           receipt_email:user?.email,
           transfer_data:{
