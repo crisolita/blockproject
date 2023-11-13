@@ -49,6 +49,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
   })),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean()
+
 });
 export const querySchemaCreateEvent= Joi.object({
   name:Joi.string().required(), place:Joi.string().required(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
@@ -81,3 +82,34 @@ event_id:Joi.number().required(), name:Joi.string(), place:Joi.string(), date:Jo
       'Montanbike_MTB',
       'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string()
 });
+export const querySchemaSetUserRol= Joi.object({
+  user_id:Joi.number().required(),user_rol:Joi.string().valid('ORGANIZADOR','DEPORTISTA').required(),status:Joi.string().valid('APROBADO','RECHAZADO').required()
+});
+export const querySchemaCanjeoDeEntrada= Joi.object({
+nftId:Joi.number().required()
+});
+export const querySchemaValidarEntrada= Joi.object({
+  qrData:Joi.string().required()
+  });
+  export const querySchemaDorsal= Joi.object({
+    dorsal_number:Joi.string().required(),nft_id:Joi.number().required()
+    });
+   
+    export const querySchemaSell= Joi.object({
+      priceBatch:Joi.array().items(Joi.object({
+        precio:Joi.number().required()
+            })),
+            nftId:Joi.number().required()
+          });
+          export const querySchemaBuy= Joi.object({
+            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3)
+                });
+          export const querySchemaEditProfile= Joi.object({
+                  first_name:Joi.string(),
+                  last_name:Joi.string(),
+                  descripcion:Joi.string(),
+                  numero_de_licencia:Joi.string(),
+                  instagram:Joi.string(),
+                  twitter:Joi.string(),
+                  facebook:Joi.string()});
+     

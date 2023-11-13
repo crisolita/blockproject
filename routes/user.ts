@@ -10,7 +10,7 @@ import {
   userEditProfile,
 } from "../controllers/user";
 import Joivalidator from "express-joi-validation";
-import { querySchemaChangePassword, querySchemaLogin, querySchemaRegistro, querySchemaSendToken, querySchemaValidate } from "../middleware/validation";
+import { querySchemaChangePassword, querySchemaEditProfile, querySchemaLogin, querySchemaRegistro, querySchemaSendToken, querySchemaValidate } from "../middleware/validation";
 import { authenticateToken } from "../middleware/auth";
 import multer from 'multer';
 
@@ -38,7 +38,7 @@ router.put("/validate",validator.body(querySchemaValidate), userTokenValidate);
 router.post("/gooogleAuth", userGoogleController);
 router.post("/requestOrganizador",authenticateToken, userRequestOrganizador);
 
-router.put("/editProfile",upload.single('userprofile'),authenticateToken, userEditProfile);
+router.put("/editProfile",upload.single('userprofile'),validator.body(querySchemaEditProfile),authenticateToken, userEditProfile);
 
 
 export default router;

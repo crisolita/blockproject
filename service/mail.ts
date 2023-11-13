@@ -38,3 +38,12 @@ export async function sendEntrada(email: string, path:string, name:string | null
   };
   return transporter.sendMail(mailData);
 }
+export async function sendToOrganizadorDorsalFaltante(email: string, nft_id:number) {
+  const mailData = {
+    from: process.env.EMAILADDRESS, // sender address
+    to: email, // list of receivers
+    subject: `El nft ${nft_id} ha pedido ser canjeado pero no tiene dorsal `,
+    html: `<h2 style="color:#23262F;">Te sugerimos que entres a la plataforma y le asignes un dorsal al NFT de id ${nft_id} para que pueda ser canjeado por una entrada</h3>`
+  };
+  return transporter.sendMail(mailData);
+}

@@ -39,6 +39,7 @@ model Nfts {
   caducidadVenta DateTime?
   caducidadCanjeo DateTime?
   marketplace Boolean?
+  dorsal  String?
   Evento   Eventos?    @relation(fields: [eventoId], references: [id])
   User     User?       @relation(fields: [User_id], references: [id])
   Orders   orders[]
@@ -112,7 +113,7 @@ model Entrada {
   create_at DateTime
   expire_at DateTime
   valid_start  DateTime
-  dorsal    String?
+  dorsal    String
   nftId     Int @unique
   used      Boolean?
   burnHash  String?

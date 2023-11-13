@@ -9,7 +9,7 @@ import moment from "moment";
 import qr from "qrcode"
 import fs from "fs"
 import PDFDocument, { dash } from "pdfkit"
-import { sendEntrada } from "../service/mail";
+import { sendEntrada, sendToOrganizadorDorsalFaltante } from "../service/mail";
 import { getEntradaByNFTID } from "../service/entrada";
 import { getEventoById } from "../service/evento";
 import CryptoJS from "crypto-js";
@@ -30,13 +30,17 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     if(!user) return res.json({error:"Usuario no encontrado"})
     if(nft?.User_id!=user?.id || owner[0]!=user?.wallet) return res.json({error:"No es dueño del NFT"})
     const tokenData= await contract.functions.getTokenData(nftId)
-
-    if(nft?.tipo!="Entrada" || tokenData[0].tipo!=0 ) return res.json({error:"No es una entrada valida"})
-     const evento = await getEventoById(nft?.eventoId,prisma)
-    const now= moment()
-    if(now.isAfter(moment(nft.caducidadCanjeo))) return res.status(400).json({error:"Ha caducido el canjeo de este NFT"})
-        //Validar que la entrada no exista con el nft_id
-    if(!evento) return res.json({error:"No se ha encontrado el evento"})
+  if(nft?.tipo!="Entrada" || tokenData[0].tipo!=0 ) return res.json({error:"No es una entrada valida"})
+  const evento = await getEventoById(nft?.eventoId,prisma)
+const now= moment()
+if(now.isAfter(moment(nft.caducidadCanjeo))) return res.status(400).json({error:"Ha caducido el canjeo de este NFT"})
+//Validar que la entrada no exista con el nft_id
+if(!evento) return res.json({error:"No se ha encontrado el evento"})
+const creator= await getUserById(evento.creator_id,prisma)
+if(!nft.dorsal) {
+ if(creator) await sendToOrganizadorDorsalFaltante(creator.email,nft.id)
+  return res.status(400).json({error:"Nft no tiene dorsal asignado, ya se le ha informado a organizador para que lo coloque"})
+}
     let entrada=await prisma.entrada.create({
       data:{
       user_id:user?.id,
@@ -45,7 +49,8 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       valid_start:(new Date(moment(evento.date).startOf("day").toString())),
       expire_at:new Date(moment(evento.date).endOf("day").toString()),
       nftId:nftId,
-      used:false
+      used:false,
+      dorsal:nft.dorsal
   }})
     const eventData = {
       user_id:user?.id,
@@ -57,7 +62,8 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       entradaId:entrada.id,
       valid_start:new Date(moment(evento.date).startOf("day").toString()),
       expire_at:new Date(moment(evento.date).endOf("day").toString()),
-      nftId:nftId
+      nftId:nftId,
+      dorsal:nft.dorsal
     }
 
     /// Crear el qrcode
@@ -154,22 +160,5 @@ export const getEntradas = async (req: Request, res: Response) => {
     res.json({ error:error});
   }
 };
-export const asignarDorsal = async (req: Request, res: Response) => {
-  try {
-    // @ts-ignore
-    const prisma = req.prisma as PrismaClient;
-     // @ts-ignore
-     const USER = req.user as User;
-     const {dorsal_number,entrada_id}=req.body;
-    const user=await getUserById(USER.id,prisma);
-    if(!user) return res.status(404).json({error:"User no valido"})
-    let entrada= await prisma.entrada.findUnique({where:{id:entrada_id}})
-  if(!entrada || entrada.used) return res.status(404).json({error:"Entrada usada o inexistente"})
-    entrada= await prisma.entrada.update({where:{id:entrada_id},data:{dorsal:dorsal_number}})
-  return res.json(entrada)
-  } catch (error) {
-    console.log(error)
-    res.json({ error:error});
-  }
-};
+
 
