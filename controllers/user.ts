@@ -48,7 +48,7 @@ export const userRegisterController = async (req: Request, res: Response) => {
         { data: { email: email, first_name,last_name,wallet,user_rol:"DEPORTISTA",company_cif,company_name,birth_date} }
       );
     } else {
-      res.status(409).json({error:"Email ya registrado"})
+      res.status(400).json({error:"Email ya registrado"})
     }
   } catch (error ) {
     console.log(error)
