@@ -13,7 +13,6 @@ import { sendEntrada, sendToOrganizadorDorsalFaltante } from "../service/mail";
 import { getEntradaByNFTID } from "../service/entrada";
 import { getEventoById } from "../service/evento";
 import CryptoJS from "crypto-js";
-import { createJWTEntrada } from "../utils/utils";
 
 export const canjearNFTporEntada = async (req: Request, res: Response) => {
   try {

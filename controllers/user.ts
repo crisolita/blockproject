@@ -15,6 +15,7 @@ import { createWallet } from "../service/web3";
 import CryptoJS from "crypto-js";
 import axios from "axios";
 import { handleImageUpload } from "./eventos";
+import moment from "moment";
 
 const stripe = require('stripe')(process.env.SK_TEST);
 
@@ -67,15 +68,19 @@ export const userLoginController = async (req: Request, res: Response) => {
     const { email, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
     const salt = bcrypt.genSaltSync();
-
-    if (user && user.password && bcrypt.compareSync(password, user.password)) {
+    const now=moment()
+    if (user && user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))) {
       await sendEmail(email, authCode);
-      await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), prisma);
+      await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), now.add(15,'days').toDate(), prisma);
       return res.json(
         {
           data: `Se ha enviado código de validación al correo: ${email}`,
         }
       );
+    } else if(user && now.isBefore(moment(user?.tokenValidUntil))) {
+      return res.json(
+        { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
+      ;
     } else {
       res.status(404).json({error:"Email o contraseña incorrectos"});
     }
@@ -94,7 +99,7 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     if (user) {
       if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
         return res.json(
-          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,token: createJWT(user) })
+          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
         ;
       else
         return res.status(404).json({ error: "Token 2fa incorrecto." });
@@ -145,13 +150,14 @@ export const recoverPasswordSendTokenController = async (
     const prisma = req.prisma as PrismaClient;
     const { email } = req?.body;
     const user = await getUserByEmail(email, prisma);
-
+      const now= moment()
     if (user) {
       const salt = bcrypt.genSaltSync();
       await sendEmail(email, authCode);
       await updateUserAuthToken(
         user.id.toString(),
         bcrypt.hashSync(authCode, salt),
+        now.add(15,'days').toDate(),
         prisma
       );
       return res.json(
@@ -276,4 +282,23 @@ export const userEditProfile = async (req: Request, res: Response) => {
     res.json({ error });
   }
 };
+export const getUserInfo = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;  
+    const user= await getUserById(USER.id,prisma)
+   if(!user) return res.status(404).json({error:"Usuario no encontrado"})
+    return res.json({email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user)})
+  } catch(error) {
+    console.log(error)
+    return res.status(500).json({ error: error });
+  } 
+}
+
+
+function moemt() {
+  throw new Error("Function not implemented.");
+}
 

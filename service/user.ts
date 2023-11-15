@@ -71,12 +71,13 @@ export const updateUserBalance = async (
 export const updateUserAuthToken = async (
   id: string,
   authToken: string,
+  tokenValidUntil:Date,
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({
     where: { id: Number(id) },
     data: {
-      authToken,
+      authToken,tokenValidUntil
     },
   });
 };

@@ -11,24 +11,12 @@ export const createJWT = (user: any) => {
     },
     JWT_PRIVATE_KEY,
     {
-      expiresIn: "72h",
+      expiresIn: "360h",
     }
   );
 };
 
-export const createJWTEntrada = (user: any) => {
-  return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      time: Date.now(),
-    },
-    JWT_PRIVATE_KEY,
-    {
-      expiresIn: "1000h",
-    }
-  );
-};
+
 
 export const validateToken = (token: string) => {
   const user = jwt.verify(token, JWT_PRIVATE_KEY);

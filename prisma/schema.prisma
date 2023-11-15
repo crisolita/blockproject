@@ -58,6 +58,7 @@ model User {
   acctStpId    String?
   clientSecret String?
   birth_date  DateTime?
+  tokenValidUntil DateTime?
   googleID  String? @unique
   user_rol ROL
   company_name String?
