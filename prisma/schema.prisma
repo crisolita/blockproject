@@ -99,6 +99,7 @@ model Eventos {
   fecha_inicio_venta DateTime?
   fecha_final_venta DateTime?
   fecha_asignacion DateTime?
+  descripcion   String?
   Nfts          Nfts[]
   User          User?     @relation(fields: [creator_id], references: [id])
   Entrada       Entrada[]
@@ -134,7 +135,6 @@ enum TicketTime {
 enum ROL {
 DEPORTISTA
 ORGANIZADOR
-ADMIN
 }
 
 enum StatusRequest {

@@ -15,7 +15,7 @@ export function isAdmin(req: Request, res: Response, next: NextFunction) {
 
     // @ts-ignore
     req.user = user;
-    if (user.email !== "admin@mail.com") return res.sendStatus(403);
+    if (user.email !== "rodri.595@hotmail.com") return res.sendStatus(403);
 
     next();
   });

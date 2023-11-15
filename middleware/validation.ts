@@ -64,7 +64,7 @@ export const querySchemaCreateEvent= Joi.object({
       'Full',
        'Ruta',
       'Montanbike_MTB',
-      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string()
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
 });
 export const querySchemaEditEvent= Joi.object({
  
@@ -80,7 +80,7 @@ event_id:Joi.number().required(), name:Joi.string(), place:Joi.string(), date:Jo
       'Full',
        'Ruta',
       'Montanbike_MTB',
-      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string()
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
 });
 export const querySchemaSetUserRol= Joi.object({
   user_id:Joi.number().required(),user_rol:Joi.string().valid('ORGANIZADOR','DEPORTISTA').required(),status:Joi.string().valid('APROBADO','RECHAZADO').required()

@@ -13,7 +13,7 @@ const storage = multer.memoryStorage(); // Almacena la imagen en la memoria, pue
  const upload = multer({ storage: storage });
 const router = express.Router();
 // RECUERDA PONER LOS VALIDADORES DE JOI
-router.post("/createEvent",validator.body(querySchemaCreateEvent),upload.fields([{name:'profile',maxCount:1},{name:'banner',maxCount:1}]), authenticateToken,createEvent);
+router.post("/createEvent",validator.body(querySchemaCreateEvent),upload.fields([{name:'profile',maxCount:1},{name:'banner',maxCount:1}]), isOrganizador,createEvent);
 router.post("/dorsal",authenticateToken,validator.body(querySchemaDorsal),asignarDorsal)
 
 router.put("/updateEvent",validator.body(querySchemaEditEvent),upload.fields([{name:'profile',maxCount:1},{name:'banner',maxCount:1}]),isOrganizador, updateEvent);

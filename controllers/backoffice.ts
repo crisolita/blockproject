@@ -45,3 +45,27 @@ export const updateRolUser= async (req:Request,res: Response) => {
         res.status(500).json({error:e})
       }
       }
+      export const getAllUsers= async (req:Request,res: Response) => {
+        try {
+           // @ts-ignore
+           const prisma = req.prisma as PrismaClient;
+           let data=[];
+           let eventos;
+           let users= await prisma.user.findMany()
+           for (let user of users) {
+            const nfts= await prisma.nfts.findMany({where:{User_id:user.id}})
+            if(user.user_rol=="ORGANIZADOR") {
+               eventos= await prisma.eventos.findMany({where:{creator_id:user.id}})
+            }
+            data.push({
+              user,
+              nfts,
+              eventos
+            })
+           }
+        return res.json(data)
+        } catch (e) {
+          console.log(e)
+          res.status(500).json({error:e})
+        }
+        }

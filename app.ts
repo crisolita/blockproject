@@ -9,7 +9,8 @@ import marketplaceRouter from "./routes/marketplace";
 import stripeRouter from "./routes/stripe";
 import eventosRouter from "./routes/eventos";
 import entradasRouter from "./routes/entradas";
-import cuponesRouter from "./routes/entradas";
+import backofficeRouter from "./routes/backoffice";
+
 
 
 
@@ -43,7 +44,8 @@ app.use("/marketplace", marketplaceRouter);
 app.use("/stripe", stripeRouter);
 app.use("/eventos", eventosRouter);
 app.use("/entradas", entradasRouter);
-app.use("/cupones", cuponesRouter);
+app.use("/backoffice", backofficeRouter);
+
 
 
 
