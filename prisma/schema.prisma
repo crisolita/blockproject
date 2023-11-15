@@ -59,7 +59,6 @@ model User {
   clientSecret String?
   birth_date  DateTime?
   googleID  String? @unique
-  validadoOrganizador Boolean?
   user_rol ROL
   company_name String?
   company_cif String?

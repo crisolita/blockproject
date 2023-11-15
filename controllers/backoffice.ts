@@ -54,6 +54,7 @@ export const updateRolUser= async (req:Request,res: Response) => {
            let users= await prisma.user.findMany()
            for (let user of users) {
             const nfts= await prisma.nfts.findMany({where:{User_id:user.id}})
+          
             if(user.user_rol=="ORGANIZADOR") {
                eventos= await prisma.eventos.findMany({where:{creator_id:user.id}})
             }
