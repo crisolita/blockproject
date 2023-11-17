@@ -14,7 +14,7 @@ export const createEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
         //@ts-ignore
     const USER = req.user as User;
-    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion,descripcion } = req.body;
+    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion,descripcion} = req.body;
 
     const user = await getUserById(USER.id, prisma);
   
@@ -34,9 +34,9 @@ export const createEvent = async (req: Request, res: Response) => {
         fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
         distancia:Number(distancia),
       }, prisma);
-      if(req.files) {
+      if(req.files ) {
           //@ts-ignore
-    const profile = req.files['profile'][0].buffer;
+    const profile = req.files['profile']? req.files['profile'][0].buffer: undefined;
       if(profile) {
         const base64ImageProfile = profile.toString('base64');
         const pathProfile = `profile_event_${event.id}`;
@@ -44,7 +44,7 @@ export const createEvent = async (req: Request, res: Response) => {
         await updateEvento(event.id,{profile_image:pathProfile},prisma)
       }
               //@ts-ignore
-        const banner = req.files['banner'][0].buffe
+        const banner = req.files['banner']? req.files['banner'][0].buffer: undefined
         if(banner) {
           const bannerPath=`banner_event_${event.id}`
           const base64ImageBanner = banner.toString('base64');
@@ -76,7 +76,7 @@ export const updateEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
         //@ts-ignore
     const USER = req.user as User;
-    const { event_id,name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion } = req.body;
+    const { event_id,name, place, date, modalidad, descripcion,instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion } = req.body;
 
     const user = await getUserById(USER.id, prisma);
     const event = await getEventoById(event_id,prisma)
@@ -86,18 +86,19 @@ export const updateEvent = async (req: Request, res: Response) => {
         name,
         creator_id: user.id,
         place,
-        date:new Date(date),
+        date:date? new Date(date): event.date,
         modalidad,
         instagram,
         subcategoria,
         twitter,
         facebook,
-        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
+        descripcion,
+        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):event.fecha_inicio_venta,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):event.fecha_asignacion,
         distancia:Number(distancia),
       }, prisma);
       if(req.files) {
           //@ts-ignore
-    const profile = req.files['profile'][0].buffer;
+    const profile = req.files['profile']? req.files['profile'][0].buffer: undefined;
       if(profile) {
         const base64ImageProfile = profile.toString('base64');
         const pathProfile = `profile_event_${event.id}`;
@@ -107,7 +108,7 @@ export const updateEvent = async (req: Request, res: Response) => {
         },prisma)
       }
               //@ts-ignore
-        const banner = req.files['banner'][0].buffe
+        const banner = req.files['banner']? req.files['banner'][0].buffer: undefined
         if(banner) {
           const bannerPath=`banner_event_${event.id}`
           const base64ImageBanner = banner.toString('base64');
