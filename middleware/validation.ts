@@ -48,7 +48,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean()
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean()
 
 });
 export const querySchemaCreateEvent= Joi.object({
@@ -111,5 +111,12 @@ export const querySchemaValidarEntrada= Joi.object({
                   numero_de_licencia:Joi.string(),
                   instagram:Joi.string(),
                   twitter:Joi.string(),
-                  facebook:Joi.string()});
+                  facebook:Joi.string(),
+                  dni_passport:Joi.string(),
+                  telefono:Joi.string(),
+                  birth_date:Joi.string(),
+                  gender:Joi.string(),
+                  direccion_postal:Joi.string(),
+                  talla_camisa:Joi.string().valid('XS','S','M','L','XL','XXL'),
+                  club:Joi.string() });
      

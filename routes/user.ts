@@ -39,7 +39,7 @@ router.put("/validate",validator.body(querySchemaValidate), userTokenValidate);
 router.post("/gooogleAuth", userGoogleController);
 router.post("/requestOrganizador",authenticateToken, userRequestOrganizador);
 
-router.put("/editProfile",upload.single('userprofile'),validator.body(querySchemaEditProfile),authenticateToken, userEditProfile);
+router.put("/editProfile",validator.body(querySchemaEditProfile),upload.single('userprofile'),authenticateToken, userEditProfile);
 router.get("/getUserInfo",authenticateToken, getUserInfo);
 
 

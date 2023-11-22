@@ -4,11 +4,13 @@ import bcrypt from "bcrypt";
 import { createJWT } from "../utils/utils";
 import {
   createUser,
+  createUserInfo,
   getUserByEmail,
   getUserByGoogleID,
   getUserById,
   updateUser,
   updateUserAuthToken,
+  updateUserInfo,
 } from "../service/user";
 import { sendEmail } from "../service/mail";
 import { createWallet } from "../service/web3";
@@ -67,6 +69,7 @@ export const userLoginController = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     const { email, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
+    const userInfo= await prisma.userInfo.findUnique({where:{user_id:user?.id}})
     const salt = bcrypt.genSaltSync();
     const now=moment()
     if (user && user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))) {
@@ -79,7 +82,7 @@ export const userLoginController = async (req: Request, res: Response) => {
       );
     } else if(user && now.isBefore(moment(user?.tokenValidUntil))) {
       return res.json(
-        { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
+        { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,userInfo,token: createJWT(user) })
       ;
     } else {
       res.status(404).json({error:"Email o contraseña incorrectos"});
@@ -96,10 +99,11 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     const { email, authCode } = req?.body;
     const user = await getUserByEmail(email, prisma);
+    const userInfo= await prisma.userInfo.findUnique({where:{user_id:user?.id}})
     if (user) {
       if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
         return res.json(
-          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
+          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,userInfo,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
         ;
       else
         return res.status(404).json({ error: "Token 2fa incorrecto." });
@@ -126,7 +130,7 @@ export const changePasswordController = async (req: Request, res: Response) => {
           { password: bcrypt.hashSync(newPassword, salt) },
           prisma
         );
-        return res.json({ email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif});
+        return res.json({ email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif});
       } else
         return res.json({ data: "Token 2fa incorrecto." });
     } else {
@@ -191,9 +195,10 @@ export const userGoogleController = async (req: Request, res: Response) => {
 
     user= await createUser({email:response.data.email,googleID:response.data.id,user_rol:"DEPORTISTA",wallet:wallet?.address,key},prisma)
     
-      res.status(200).json({email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, token: createJWT(user)});
+      res.status(200).json({email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, token: createJWT(user)});
     } else if (exist && exist.email==response.data.email){
-      res.status(200).json({email:exist.email,id:exist.id,googleId:exist.id,first_name:exist.first_name,last_name:exist.last_name,user_rol:exist.user_rol,birth_date:exist.birth_date,company_name:exist.company_name,company_cif:exist.company_cif, token: createJWT(user)});
+      const userInfo= await prisma.userInfo.findUnique({where:{user_id:exist.id}})
+      res.status(200).json({email:exist.email,id:exist.id,googleId:exist.id,first_name:exist.first_name,last_name:exist.last_name,user_rol:exist.user_rol,company_name:exist.company_name,company_cif:exist.company_cif,userInfo, token: createJWT(user)});
     }    
       } catch ( error ) {
     console.log(error)
@@ -219,7 +224,7 @@ export const userRequestOrganizador = async (req: Request, res: Response) => {
       }
     })
     const update=await updateUser(USER.id,{company_cif,company_name},prisma)
-    res.json({email:update.email,id:update.id,googleId:update.googleID,first_name:update.first_name,last_name:update.last_name,user_rol:update.user_rol,birth_date:update.birth_date,company_name:update.company_name,company_cif:update.company_cif})
+    res.json({email:update.email,id:update.id,googleId:update.googleID,first_name:update.first_name,last_name:update.last_name,user_rol:update.user_rol,company_name:update.company_name,company_cif:update.company_cif})
   } catch ( error ) {
     console.log(error)
     res.status(500).json({error:error})
@@ -238,18 +243,25 @@ export const userEditProfile = async (req: Request, res: Response) => {
       first_name,
       last_name,
       descripcion,
-      numero_de_licencia,
       instagram,
       twitter,
-      facebook
+      facebook,
+      dni_passport,
+      telefono,
+      birth_date,
+      gender,
+      numero_de_licencia,
+      direccion_postal,
+      talla_camisa,
+      club 
     } = req?.body;
     let update;
     const user = await getUserById(USER.id, prisma);
      if(!user) return res.status(404).json({error:"Usuario no encontrado"})
+    const userInfo= await prisma.userInfo.findUnique({where:{user_id:USER.id}}) 
      update= await updateUser(USER.id,{first_name,
       last_name,
       descripcion,
-      numero_de_licencia,
       instagram,
       twitter,
       facebook},prisma)
@@ -260,6 +272,34 @@ export const userEditProfile = async (req: Request, res: Response) => {
     await handleImageUpload(base64ImageProfile,profilepath)
    update= await updateUser(USER.id,{foto_perfil:profilepath},prisma)
    } 
+let info;
+   if(userInfo) {
+     info= await updateUserInfo(USER.id,{dni_passport,
+      telefono,
+      birth_date:birth_date? new Date(birth_date) : undefined,
+      gender,
+      numero_de_licencia,
+      direccion_postal,
+      talla_camisa,
+      club },prisma)
+   } else  {
+    if( dni_passport &&
+      telefono &&
+      birth_date &&
+      gender &&
+      numero_de_licencia &&
+      direccion_postal &&
+      talla_camisa) {
+        info= await createUserInfo({user_id:USER.id,dni_passport,
+         telefono,
+         birth_date:new Date(birth_date),
+         gender,
+         numero_de_licencia,
+         direccion_postal,
+         talla_camisa,
+         club },prisma)
+      }
+      }
       res.json({
         id:USER.id,
         email:user.email,
@@ -267,15 +307,14 @@ export const userEditProfile = async (req: Request, res: Response) => {
         company_cif:user.company_cif,
         company_name:user.company_name,
         user_rol:user.user_rol,
-        birth_date:user.birth_date,
         first_name:update.first_name,
         last_name:update.last_name,
         descripcion:update.descripcion,
-        numero_de_licencia:update.numero_de_licencia,
         foto_perfil:update.foto_perfil,
         instagram:update.instagram,
         twitter:update.twitter,
-        facebook:update.facebook})
+        facebook:update.facebook,
+      info})
   }
   catch (error ) {
     console.log(error)
@@ -290,7 +329,8 @@ export const getUserInfo = async (req: Request, res: Response) => {
     const USER = req.user as User;  
     const user= await getUserById(USER.id,prisma)
    if(!user) return res.status(404).json({error:"Usuario no encontrado"})
-    return res.json({email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user)})
+   const userInfo= await prisma.userInfo.findUnique({where:{user_id:user.id}})
+    return res.json({userInfo,email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user)})
   } catch(error) {
     console.log(error)
     return res.status(500).json({ error: error });
@@ -298,7 +338,5 @@ export const getUserInfo = async (req: Request, res: Response) => {
 }
 
 
-function moemt() {
-  throw new Error("Function not implemented.");
-}
+
 

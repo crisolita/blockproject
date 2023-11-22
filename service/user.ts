@@ -1,4 +1,4 @@
-import { PrismaClient, ROL } from "@prisma/client";
+import { Genero, PrismaClient, ROL, Talla } from "@prisma/client";
 
 export const getUserById = async (id: number, prisma: PrismaClient) => {
   return await prisma.user.findUnique({
@@ -27,7 +27,6 @@ export const updateUser = async (
   data: { email?: string; password?: string, acctStpId?:string, clientSecret?:string,company_name?:string,company_cif?:string,first_name?:string,
     last_name?:string,
     descripcion?:string,
-    numero_de_licencia?:string,
     foto_perfil?:string,
     instagram?:string,
     twitter?:string,
@@ -41,7 +40,44 @@ export const updateUser = async (
     },
   });
 };
+export const updateUserInfo = async (
+  user_id: number,
+  data: {dni_passport?:string,
+    telefono?:string,
+    birth_date?:Date,
+    gender?:Genero,
+    numero_de_licencia?:string,
+    direccion_postal?:string,
+    talla_camisa?:Talla,
+    club?:string },
+  prisma: PrismaClient
+) => {
+  return await prisma.userInfo.update({
+    where: { user_id },
+    data: {
+      ...data,
+    },
+  });
+};
 
+export const createUserInfo = async (
+  data: {user_id:number,
+    dni_passport:string,
+    telefono:string,
+    birth_date:Date,
+    gender:Genero,
+    numero_de_licencia:string,
+    direccion_postal:string,
+    talla_camisa:Talla,
+    club?:string },
+  prisma: PrismaClient
+) => {
+  return await prisma.userInfo.create({
+    data: {
+      ...data,
+    },
+  });
+};
 export const createUser = async (
   data: { email: string; password?: string, first_name?:string,googleID?:string, last_name?:string,birth_date?:Date,company_name?:string,company_cif?:string,wallet:string,key:string,user_rol:ROL},
   prisma: PrismaClient

@@ -6,6 +6,7 @@ import {
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import { getEntradaByEventoID } from "../service/entrada";
 import { uploadImage } from "../service/aws";
+import moment from "moment";
 
 
 export const createEvent = async (req: Request, res: Response) => {
@@ -17,7 +18,6 @@ export const createEvent = async (req: Request, res: Response) => {
     const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion,descripcion} = req.body;
 
     const user = await getUserById(USER.id, prisma);
-  
     
     if (user) {
       let event = await createEvento({

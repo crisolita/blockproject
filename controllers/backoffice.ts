@@ -59,11 +59,13 @@ export const updateRolUser= async (req:Request,res: Response) => {
                eventos= await prisma.eventos.findMany({where:{creator_id:user.id}})
             }
             const request= await prisma.requestOrganizador.findUnique({where:{user_id:user.id}})
+            const info=await prisma.userInfo.findUnique({where:{user_id:user.id}})
             data.push({
-              email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,birth_date:user.birth_date,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,numero_de_licencia:user.numero_de_licencia,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,
+              email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,
               nfts,
               eventos,
-              requestedOrganizador:request?.status
+              requestedOrganizador:request?.status,
+              info
             })
            }
         return res.json(data)

@@ -58,6 +58,8 @@ export const buyNFT = async (req: Request, res: Response) => {
     const { orderId,cardNumber,exp_month,exp_year,cvc} = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
+    const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
+    if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
     if(order.buyerId || order.completedAt || !order.active ) return res.json({error:"Order esta completa"})
     const event= await getEventoById(order.eventoId,prisma)
@@ -75,11 +77,24 @@ export const buyNFT = async (req: Request, res: Response) => {
       return Number(fechaA) - Number(fechaB);
     });
     for (let price of precios ) {
-      if(now.isAfter(moment(new Date(price.fecha_tope)))) priceActual=price.precio
+      if(now.isAfter(moment(new Date(price.fecha_tope)))) {
+        priceActual=price.precio
+      }
     }
-    if(buyer && buyer.wallet && seller?.acctStpId) {
+    let adicionalesUser=[];
+    if(order.adicionales) {
+     let adicionales= JSON.parse(order.adicionales) 
+     for (let adicional of adicionales) {
+      if(adicional.active) {
+        priceActual+=adicional.valor;
+        adicionalesUser.push(adicional)
+      }
+     }
+    }
+    console.log(adicionalesUser,priceActual)
+    if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
       //VALIDAR EL PAGO
-        const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual).toString(),prisma)
+        const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,priceActual,prisma)
         if(!charge) return res.json({error:"Pago con tarjeta ha fallado"})
         const transferFrom= await contract.connect(wallet).functions.transferFrom(seller.wallet,buyer.wallet,order.nftId)
         order=await prisma.orders.update({
@@ -89,6 +104,7 @@ export const buyNFT = async (req: Request, res: Response) => {
             txHash:transferFrom.hash,
             buyerId:buyer.id,
             completedAt:new Date(),
+            adicionalesUsados:JSON.stringify(adicionalesUser),
             precio_usado:Number(priceActual)
           },
         })
@@ -114,13 +130,16 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell } = req?.body;
+    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell ,adicionales} = req?.body;
     const user= await getUserById(USER.id,prisma);
     const event= await getEventoById(eventoId,prisma)
     if(!event) return res.status(404).json({error:"No event found"})
     if(event.creator_id!==user?.id) return res.status(400).json({error:"user no ha creado el evento"})
     let orders=[]
     let nfts=[]
+    for (let precio of priceBatch) {
+      if(!moment(precio.fecha_tope).isValid()) return res.status(400).json({error:"Fecha invalida en precio batch"})
+    }
     if(user && user.wallet && user.acctStpId) {
       ///mint NFT
       let nftIDs:number[]=[];
@@ -149,6 +168,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
             nftId:i,
             eventoId:eventoId,
             precio_batch:JSON.stringify(priceBatch),
+            adicionales:JSON.stringify(adicionales),
             active:true,
             createdAt:new Date()
           },
