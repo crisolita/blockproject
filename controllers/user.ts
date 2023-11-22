@@ -72,21 +72,26 @@ export const userLoginController = async (req: Request, res: Response) => {
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:user?.id}})
     const salt = bcrypt.genSaltSync();
     const now=moment()
-    if (user && user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))) {
-      await sendEmail(email, authCode);
-      await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), now.add(15,'days').toDate(), prisma);
-      return res.json(
-        {
-          data: `Se ha enviado código de validación al correo: ${email}`,
-        }
-      );
-    } else if(user && now.isBefore(moment(user?.tokenValidUntil))) {
-      return res.json(
-        { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,userInfo,token: createJWT(user) })
-      ;
-    } else {
-      res.status(404).json({error:"Email o contraseña incorrectos"});
+    if(user) {
+      if ( user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))|| user.tokenValidUntil==null) {
+        await sendEmail(email, authCode);
+        await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), now.add(15,'days').toDate(), prisma);
+        return res.json(
+          {
+            data: `Se ha enviado código de validación al correo: ${email}`,
+          }
+        );
+      } else if(user && now.isBefore(moment(user?.tokenValidUntil))) {
+        return res.json(
+          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,userInfo,token: createJWT(user) })
+        ;
+      } else {
+        res.status(404).json({error:"Contraseña incorrectos"});
+      }
+    }else  {
+      res.status(404).json({error:"Email incorrecto"});
     }
+  
   } catch (error ) {
     res.json({ error });
   }
