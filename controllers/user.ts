@@ -93,7 +93,7 @@ export const userLoginController = async (req: Request, res: Response) => {
     }
   
   } catch (error ) {
-    res.json({ error });
+    res.status(500).json( error );
   }
 };
 
