@@ -69,10 +69,10 @@ export const userLoginController = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     const { email, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
-    const userInfo= await prisma.userInfo.findUnique({where:{user_id:user?.id}})
     const salt = bcrypt.genSaltSync();
     const now=moment()
     if(user) {
+      const userInfo= await prisma.userInfo.findUnique({where:{user_id:user.id}})
       if ( user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))|| user.tokenValidUntil==null) {
         await sendEmail(email, authCode);
         await updateUserAuthToken(user.id,  {authToken:bcrypt.hashSync(authCode, salt)}, prisma);
