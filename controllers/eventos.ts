@@ -75,7 +75,7 @@ export const updateEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
         //@ts-ignore
     const USER = req.user as User;
-    const { event_id,name, place, date, modalidad, descripcion,instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion } = req.body;
+    const { event_id,name, place, date, modalidad, descripcion,instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_final_venta,fecha_asignacion } = req.body;
 
     const user = await getUserById(USER.id, prisma);
     const event = await getEventoById(event_id,prisma)
@@ -92,7 +92,7 @@ export const updateEvent = async (req: Request, res: Response) => {
         twitter,
         facebook,
         descripcion,
-        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):event.fecha_inicio_venta,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):event.fecha_asignacion,
+        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):event.fecha_inicio_venta,fecha_final_venta:fecha_final_venta? new Date(fecha_final_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):event.fecha_asignacion,
         distancia:Number(distancia)
       }, prisma);
       if(req.files) {
@@ -116,7 +116,7 @@ export const updateEvent = async (req: Request, res: Response) => {
         }
      
       }
-      res.json(event);
+      res.json(updated);
     } else {
       res.status(400).json({ error: "User not valid" });
     }

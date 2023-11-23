@@ -48,7 +48,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),codigo_descuento:Joi.array().items(Joi.object({codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)}))
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.object({required:Joi.boolean(),costo:Joi.number()}),codigo_descuento:Joi.array().items(Joi.object({codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)}))
 
 });
 export const querySchemaCreateEvent= Joi.object({
@@ -80,7 +80,7 @@ event_id:Joi.number().required(), name:Joi.string(), place:Joi.string(), date:Jo
       'Full',
        'Ruta',
       'Montanbike_MTB',
-      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_final_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
 });
 export const querySchemaSetUserRol= Joi.object({
   user_id:Joi.number().required(),user_rol:Joi.string().valid('ORGANIZADOR','DEPORTISTA').required(),status:Joi.string().valid('APROBADO','RECHAZADO').required()
@@ -101,8 +101,8 @@ export const querySchemaValidarEntrada= Joi.object({
             })),
             nftId:Joi.number().required()
           });
-          export const querySchemaBuy= Joi.object({
-            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3)
+          export const querySchemaBuy= Joi.object({codigo_descuento:Joi.string(),
+            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()}))
                 });
           export const querySchemaEditProfile= Joi.object({
                   first_name:Joi.string(),
@@ -116,8 +116,9 @@ export const querySchemaValidarEntrada= Joi.object({
                   numero_documento:Joi.string(),
                   telefono:Joi.string(),
                   birth_date:Joi.string(),
-                  gender:Joi.string(),
+                  gender:Joi.string().valid('MASCULINTO','FEMENINO','OTROS'),
                   direccion_postal:Joi.string(),
                   talla_camisa:Joi.string().valid('XS','S','M','L','XL','XXL'),
-                  club:Joi.string() });
+                  club:Joi.string()
+                 });
      

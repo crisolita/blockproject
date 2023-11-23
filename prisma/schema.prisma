@@ -23,6 +23,7 @@ model orders {
   adicionales String?
   adicionalesUsados String?
   precio_batch String
+  license_required String?
   codigo_descuento String?
   Evento       Eventos?  @relation(fields: [eventoId], references: [id])
   User         User      @relation(fields: [sellerID], references: [id])

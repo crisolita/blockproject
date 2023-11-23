@@ -4,7 +4,7 @@ import {
   getUserById,
 } from "../service/user";
 import contract, {  wallet } from "../service/web3";
-import {  getIfOrderIsActive, getNftsById, getNftsForOrder, getOrder } from "../service/marketplace";
+import {  createOrder, getIfOrderIsActive, getNftsById, getNftsForOrder, getOrder } from "../service/marketplace";
 import { createCharge } from "../service/stripe";
 import { getEventoById } from "../service/evento";
 import moment from "moment";
@@ -55,7 +55,8 @@ export const buyNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { orderId,cardNumber,exp_month,exp_year,cvc,adiciones} = req?.body;
+    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento
+    } = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
@@ -64,7 +65,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     if(order.buyerId || order.completedAt || !order.active ) return res.json({error:"Order esta completa"})
     const event= await getEventoById(order.eventoId,prisma)
     const now= moment()
-    if(now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado la venta"})
+    if(!now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado o no ha empezado la venta"})
     const nft= await getNftsById(order.nftId,prisma)
     if(now.isAfter(moment(nft?.caducidadVenta))) return res.status(400).json({error:"Venta ha terminado"})
     const seller= await getUserById(order?.sellerID,prisma)
@@ -81,17 +82,33 @@ export const buyNFT = async (req: Request, res: Response) => {
         priceActual=price.precio
       }
     }
-    let adicionalesUser=[];
-    if(order.adicionales) {
-     let adicionales= JSON.parse(order.adicionales) 
+    if(adicionales && order.adicionales) {
+      let adicionalesOrder=JSON.parse(order.adicionales)
+      console.log(adicionales)
+      console.log(order.adicionales)
+     console.log(adicionalesOrder.find((adic:any)=>adic.concepto=="Impuesto"))
+
      for (let adicional of adicionales) {
-      if(adicional.active) {
+      if(adicional.active && adicionalesOrder.find((adic:any)=>adic.concepto==adicional.concepto)) {
         priceActual+=adicional.valor;
-        adicionalesUser.push(adicional)
       }
      }
     }
-    console.log(adicionalesUser,priceActual)
+    if(order.license_required && JSON.parse(order.license_required).required && !userInfo.numero_de_licencia) {
+      priceActual+=JSON.parse(order.license_required).costo
+    }
+    if(codigo_descuento && order.codigo_descuento) {
+      //validar que el codigo exista para la orden
+
+      const codigos=JSON.parse(order.codigo_descuento)
+      for (let codigo of codigos) {
+        if(codigo.codigo==codigo_descuento) {
+          priceActual=priceActual-priceActual*codigo.porcentaje/100
+        }
+      }
+    }
+
+    console.log(priceActual)
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
       //VALIDAR EL PAGO
         const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,priceActual,prisma)
@@ -104,7 +121,7 @@ export const buyNFT = async (req: Request, res: Response) => {
             txHash:transferFrom.hash,
             buyerId:buyer.id,
             completedAt:new Date(),
-            adicionalesUsados:JSON.stringify(adicionalesUser),
+            adicionalesUsados:JSON.stringify(adicionales),
             precio_usado:Number(priceActual)
           },
         })
@@ -130,7 +147,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell ,adicionales,codigo_descuento} = req?.body;
+    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell ,adicionales,codigo_descuento,license_required} = req?.body;
     const user= await getUserById(USER.id,prisma);
     const event= await getEventoById(eventoId,prisma)
     if(!event) return res.status(404).json({error:"No event found"})
@@ -162,18 +179,17 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           },
         });
         nfts.push(nft)
-        const order=await prisma.orders.create({
-          data: {
-            sellerID:Number(user.id),
-            nftId:i,
-            eventoId:eventoId,
-            precio_batch:JSON.stringify(priceBatch),
-            adicionales:JSON.stringify(adicionales),
-            active:true,
-            createdAt:new Date(),
-            codigo_descuento:JSON.stringify(codigo_descuento)
-          },
-        })
+
+        
+        const order=await createOrder({sellerID:Number(user.id),
+          nftId:i,
+          eventoId:eventoId,
+          precio_batch:JSON.stringify(priceBatch),
+          adicionales:JSON.stringify(adicionales),
+          active:true,
+          createdAt:new Date(),
+          license_required,
+          codigo_descuento:JSON.stringify(codigo_descuento)},prisma)
         orders.push(order)
         }
       
