@@ -55,7 +55,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { orderId,cardNumber,exp_month,exp_year,cvc} = req?.body;
+    const { orderId,cardNumber,exp_month,exp_year,cvc,adiciones} = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})

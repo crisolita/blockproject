@@ -30,7 +30,8 @@ export const updateUser = async (
     foto_perfil?:string,
     instagram?:string,
     twitter?:string,
-    facebook?:string},
+    facebook?:string,
+  tokenValidUntil?:Date},
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({
@@ -107,15 +108,16 @@ export const updateUserBalance = async (
   });
 };
 export const updateUserAuthToken = async (
-  id: string,
-  authToken: string,
-  tokenValidUntil:Date,
+  id: number,
+  data:{
+  authToken?: string,
+  tokenValidUntil?:Date
+},
   prisma: PrismaClient
 ) => {
   return await prisma.user.update({
     where: { id: Number(id) },
     data: {
-      authToken,tokenValidUntil
-    },
+...data    },
   });
 };

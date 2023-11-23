@@ -75,7 +75,7 @@ export const userLoginController = async (req: Request, res: Response) => {
     if(user) {
       if ( user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))|| user.tokenValidUntil==null) {
         await sendEmail(email, authCode);
-        await updateUserAuthToken(user.id.toString(),  bcrypt.hashSync(authCode, salt), now.add(15,'days').toDate(), prisma);
+        await updateUserAuthToken(user.id,  {authToken:bcrypt.hashSync(authCode, salt)}, prisma);
         return res.json(
           {
             data: `Se ha enviado código de validación al correo: ${email}`,
@@ -104,12 +104,16 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     const { email, authCode } = req?.body;
     const user = await getUserByEmail(email, prisma);
+    const now=moment()
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:user?.id}})
     if (user) {
-      if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
+      if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : "")) {
+        await updateUserAuthToken(user.id,{tokenValidUntil:now.add(15,'days').toDate()
+      },prisma)
         return res.json(
           { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,userInfo,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user) })
         ;
+      }
       else
         return res.status(404).json({ error: "Token 2fa incorrecto." });
     } else {
@@ -126,13 +130,14 @@ export const changePasswordController = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     const { email, newPassword, authCode } = req?.body;
     const user = await getUserByEmail(email, prisma);
-
+    const now= moment()
     if (user) {
       if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : "")) {
         const salt = bcrypt.genSaltSync();
+      
         updateUser(
           user.id,
-          { password: bcrypt.hashSync(newPassword, salt) },
+          { password: bcrypt.hashSync(newPassword, salt) ,tokenValidUntil:  now.add(15,'days').toDate()},
           prisma
         );
         return res.json({ email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif});
@@ -164,9 +169,8 @@ export const recoverPasswordSendTokenController = async (
       const salt = bcrypt.genSaltSync();
       await sendEmail(email, authCode);
       await updateUserAuthToken(
-        user.id.toString(),
-        bcrypt.hashSync(authCode, salt),
-        now.add(15,'days').toDate(),
+        user.id,
+        {authToken:bcrypt.hashSync(authCode, salt)},
         prisma
       );
       return res.json(
