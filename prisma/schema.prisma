@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,7 +9,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model orders {
   id           Int       @id @default(autoincrement())
   sellerID     Int
@@ -76,6 +78,7 @@ model User {
   userInfo           userInfo?
 }
 
+
 model userInfo {
   user_id Int  @unique
   documento Documento
@@ -135,7 +138,6 @@ model Entrada {
   User        User?    @relation(fields: [user_id], references: [id])
   Evento      Eventos? @relation(fields: [evento_id], references: [id])
 }
-
 enum Modales {
   Triathlon
   Running
@@ -171,7 +173,7 @@ enum SubCategorias {
   Montanbike_MTB
   Gravel
 }
- enum Genero {
+enum Genero {
   MASCULINO
   FEMENINO
   OTROS
