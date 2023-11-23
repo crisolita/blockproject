@@ -48,7 +48,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean()
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),codigo_descuento:Joi.array().items(Joi.object({codigo:Joi.string(),porcentaje:Joi.number()}))
 
 });
 export const querySchemaCreateEvent= Joi.object({
@@ -112,7 +112,8 @@ export const querySchemaValidarEntrada= Joi.object({
                   instagram:Joi.string(),
                   twitter:Joi.string(),
                   facebook:Joi.string(),
-                  dni_passport:Joi.string(),
+                  documento:Joi.string().valid('PASAPORTE','DNI'),
+                  numero_documento:Joi.string(),
                   telefono:Joi.string(),
                   birth_date:Joi.string(),
                   gender:Joi.string(),

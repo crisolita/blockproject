@@ -12,7 +12,7 @@ export function isOrganizador(req: Request, res: Response, next: NextFunction) {
   jwt.verify(token, JWT_PRIVATE_KEY as string, async (err: any, user: any) => {
     // console.log(err);
 
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(401);
 
     // @ts-ignore
     req.user = user;

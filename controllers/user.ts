@@ -32,12 +32,12 @@ export const userRegisterController = async (req: Request, res: Response) => {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
   
-    const { email, first_name,last_name, password, user_rol,birth_date,company_name,company_cif} = req?.body;
+    const { email, first_name,last_name, password, user_rol,company_name,company_cif} = req?.body;
     const user = await getUserByEmail(email, prisma);
     const wallet = await createWallet(bcrypt.hashSync(password, salt));
     if (!user && wallet && process.env.SECRETKEY) {
       const key= CryptoJS.AES.encrypt(wallet._signingKey().privateKey,process.env.SECRETKEY).toString()
-      const user= await createUser({email,first_name,last_name,password:bcrypt.hashSync(password, salt),user_rol:"DEPORTISTA",birth_date:birth_date? new Date(birth_date):undefined,company_cif,company_name,wallet:wallet?.address,key},prisma)
+      const user= await createUser({email,first_name,last_name,password:bcrypt.hashSync(password, salt),user_rol:"DEPORTISTA",company_cif,company_name,wallet:wallet?.address,key},prisma)
       if(user_rol=="ORGANIZADOR") {
         await prisma.requestOrganizador.create({
           data:{
@@ -48,7 +48,7 @@ export const userRegisterController = async (req: Request, res: Response) => {
       }
 
       res.json(
-        { data: { email: email, first_name,last_name,wallet,user_rol:"DEPORTISTA",company_cif,company_name,birth_date} }
+        { data: { email: email, first_name,last_name,wallet,user_rol:"DEPORTISTA",company_cif,company_name} }
       );
     } else {
       res.status(400).json({error:"Email ya registrado"})
@@ -251,7 +251,8 @@ export const userEditProfile = async (req: Request, res: Response) => {
       instagram,
       twitter,
       facebook,
-      dni_passport,
+      documento,
+      numero_documento,
       telefono,
       birth_date,
       gender,
@@ -279,7 +280,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
    } 
 let info;
    if(userInfo) {
-     info= await updateUserInfo(USER.id,{dni_passport,
+     info= await updateUserInfo(USER.id,{documento,numero_documento,
       telefono,
       birth_date:birth_date? new Date(birth_date) : undefined,
       gender,
@@ -288,14 +289,13 @@ let info;
       talla_camisa,
       club },prisma)
    } else  {
-    if( dni_passport &&
+    if( documento && numero_documento &&
       telefono &&
       birth_date &&
       gender &&
-      numero_de_licencia &&
       direccion_postal &&
       talla_camisa) {
-        info= await createUserInfo({user_id:USER.id,dni_passport,
+        info= await createUserInfo({user_id:USER.id,documento,numero_documento,
          telefono,
          birth_date:new Date(birth_date),
          gender,

@@ -6,7 +6,6 @@ import {
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import { getEntradaByEventoID } from "../service/entrada";
 import { uploadImage } from "../service/aws";
-import moment from "moment";
 
 
 export const createEvent = async (req: Request, res: Response) => {
@@ -94,7 +93,7 @@ export const updateEvent = async (req: Request, res: Response) => {
         facebook,
         descripcion,
         fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):event.fecha_inicio_venta,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):event.fecha_asignacion,
-        distancia:Number(distancia),
+        distancia:Number(distancia)
       }, prisma);
       if(req.files) {
           //@ts-ignore

@@ -15,7 +15,7 @@ export function authenticateToken(
   jwt.verify(token, JWT_PRIVATE_KEY as string, (err: any, user: any) => {
     console.log(err);
 
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(401);
 
     // @ts-ignore
     req.user = user;
