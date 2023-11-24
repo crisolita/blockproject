@@ -52,7 +52,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
 
 });
 export const querySchemaCreateEvent= Joi.object({
-  name:Joi.string().required(), place:Joi.string().required(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
+  name:Joi.string().required(), place:Joi.string(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
   'Running',
   'Ciclismo').required(), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
     'KM_10',
@@ -64,7 +64,7 @@ export const querySchemaCreateEvent= Joi.object({
       'Full',
        'Ruta',
       'Montanbike_MTB',
-      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_fin_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
+      'Gravel'),fecha_inicio_venta:Joi.string(),fecha_final_venta:Joi.string(),fecha_asignacion:Joi.string(),descripcion:Joi.string()
 });
 export const querySchemaEditEvent= Joi.object({
  

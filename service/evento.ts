@@ -20,7 +20,7 @@ export const updateEvento= async (
   });
 };
 export const createEvento= async (
-  data: {name:string,creator_id: number, fecha_inicio_venta?:Date,fecha_fin_venta?:Date,fecha_asignacion?:Date,subcategoria?:SubCategorias, place?:string,date:Date, modalidad:Modales, profile_image?:string, banner_image?:string,instagram?:string, twitter?:string,facebook?:string,distancia?:number,descripcion?:string},
+  data: {name:string,creator_id: number, fecha_inicio_venta?:Date,fecha_final_venta?:Date,fecha_asignacion?:Date,subcategoria?:SubCategorias, place?:string,date:Date, modalidad:Modales, profile_image?:string, banner_image?:string,instagram?:string, twitter?:string,facebook?:string,distancia?:number,descripcion?:string},
   prisma: PrismaClient
 ) => {
   return await prisma.eventos.create({

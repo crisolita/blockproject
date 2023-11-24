@@ -14,7 +14,7 @@ export const createEvent = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
         //@ts-ignore
     const USER = req.user as User;
-    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_fin_venta,fecha_asignacion,descripcion} = req.body;
+    const { name, place, date, modalidad, instagram, twitter, facebook, distancia, subcategoria,fecha_inicio_venta,fecha_final_venta,fecha_asignacion,descripcion} = req.body;
 
     const user = await getUserById(USER.id, prisma);
     
@@ -30,7 +30,7 @@ export const createEvent = async (req: Request, res: Response) => {
         twitter,
         facebook,
         descripcion,
-        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_fin_venta:fecha_fin_venta? new Date(fecha_fin_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
+        fecha_inicio_venta:fecha_inicio_venta? new Date(fecha_inicio_venta):undefined,fecha_final_venta:fecha_final_venta? new Date(fecha_final_venta): undefined,fecha_asignacion:fecha_asignacion? new Date(fecha_asignacion):undefined,
         distancia:Number(distancia),
       }, prisma);
       if(req.files ) {
