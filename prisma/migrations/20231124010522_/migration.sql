@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Eventos" ALTER COLUMN "distancia" SET DATA TYPE DOUBLE PRECISION;

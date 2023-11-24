@@ -106,7 +106,7 @@ model Eventos {
   name               String
   place              String?
   date               DateTime
-  distancia          Int?
+  distancia          Float?
   modalidad          Modales
   subcategoria       SubCategorias?
   profile_image      String?
