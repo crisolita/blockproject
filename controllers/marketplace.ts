@@ -188,7 +188,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           adicionales:JSON.stringify(adicionales),
           active:true,
           createdAt:new Date(),
-          license_required,
+          license_required:JSON.stringify(license_required),
           codigo_descuento:JSON.stringify(codigo_descuento)},prisma)
         orders.push(order)
         }
