@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth";
-import {   asignarDorsal, createEvent, getAll, getEvent, getNFTS, getNFTSByEventsVendidos, getNFTSByUser, updateEvent } from "../controllers/eventos";
+import {   asignarDorsal, createEvent, getAll, getEvent, getInscripcionesByEvent, getNFTS, getNFTSByEventsVendidos, getNFTSByUser, updateEvent } from "../controllers/eventos";
 import { isOrganizador } from "../middleware/isOrganizador";
 import Joivalidator from "express-joi-validation";
 const validator = Joivalidator.createValidator();
@@ -18,15 +18,14 @@ router.post("/dorsal",authenticateToken,validator.body(querySchemaDorsal),asigna
 
 router.put("/updateEvent",upload.fields([{name:'profile',maxCount:1},{name:'banner',maxCount:1}]),validator.body(querySchemaEditEvent),isOrganizador, updateEvent);
 // router.delete("/deleteEvent",isOrganizador, deleteEvent);
-router.get("/", getAll);
-router.get("/event", getEvent);
-router.get("/nfts", authenticateToken,getNFTS);
+router.post("/", getAll);
+router.post("/event", getEvent);
+router.post("/nfts", authenticateToken,getNFTS);
 
-router.get("/nftsVendidos", authenticateToken,getNFTSByEventsVendidos);
-router.get("/nftsByUser", authenticateToken,getNFTSByUser);
+router.post("/nftsVendidos", authenticateToken,getNFTSByEventsVendidos);
+router.post("/nftsByUser", authenticateToken,getNFTSByUser);
 
-// router.get("/param", getByParam);
-
+router.post("/orders",authenticateToken,getInscripcionesByEvent)
 
 
 
