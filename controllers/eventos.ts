@@ -172,8 +172,8 @@ export const getEvent = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
-    const {event_id} = req.body;
-    const evento= await getEventoById(event_id,prisma)
+    const {event_id} = req.params;
+    const evento= await getEventoById(Number(event_id),prisma)
 
    return res.json(evento)
 
@@ -191,7 +191,7 @@ export const getNFTS = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-     const {event_id}= req.query;
+     const {event_id}= req.params;
     const user=await getUserById(USER.id,prisma);
     if(!user) return res.status(404).json({error:"User no valido"})
     let nfts= await prisma.nfts.findMany({where:{eventoId:Number(event_id)}})
@@ -244,7 +244,7 @@ export const getNFTSByEventsVendidos = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-     const {event_id}= req.query;
+     const {event_id}= req.params;
     const user=await getUserById(USER.id,prisma);
     if(!user) return res.status(404).json({error:"User no valido"})
     const evento= await getEventoById(Number(event_id),prisma)

@@ -196,12 +196,12 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
       
       res.json({orders,nfts});
     } else {
-      res.json({ error: "User not valid" });
+      res.status(404).json({ error: "User not valid" });
 
     }
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json({error });
   }
 };
 export const cancellSellNft = async (req: Request, res: Response) => {
