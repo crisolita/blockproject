@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth";
-import {   asignarDorsal, createEvent, getAll, getEvent, updateEvent } from "../controllers/eventos";
+import {   asignarDorsal, createEvent, getAll, getEvent, getNFTS, getNFTSByEventsVendidos, getNFTSByUser, updateEvent } from "../controllers/eventos";
 import { isOrganizador } from "../middleware/isOrganizador";
 import Joivalidator from "express-joi-validation";
 const validator = Joivalidator.createValidator();
@@ -20,6 +20,10 @@ router.put("/updateEvent",upload.fields([{name:'profile',maxCount:1},{name:'bann
 // router.delete("/deleteEvent",isOrganizador, deleteEvent);
 router.get("/", getAll);
 router.get("/event", getEvent);
+router.get("/nfts", authenticateToken,getNFTS);
+
+router.get("/nftsVendidos", authenticateToken,getNFTSByEventsVendidos);
+router.get("/nftsByUser", authenticateToken,getNFTSByUser);
 
 // router.get("/param", getByParam);
 
