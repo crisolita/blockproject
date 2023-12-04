@@ -25,7 +25,7 @@ const router = express.Router();
 // router.get("/", authenticateToken, isAdmin, userController);
 
 router.post(
-  "/register",
+  "/register",validator.body(querySchemaRegistro),
   userRegisterController
 );
 

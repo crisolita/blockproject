@@ -10,8 +10,9 @@ export const querySchemaRegistro = Joi.object({
   email: Joi.string()
     .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
     .required(),
-  typeOfUser: Joi.string().required(),
-  country: Joi.string().required(),
+user_rol:Joi.string().valid('DEPORTISTA','ORGANIZADOR').required(),
+company_cif:Joi.string(),
+company_name:Joi.string()
 });
 export const querySchemaLogin = Joi.object({
   password: Joi.string().required().pattern(new RegExp(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[`~!@#$%^&*()\-_=+[{\]}|\\;:'",<.>\/?])[A-Za-z0-9`~!@#$%^&*()\-_=+[{\]}|\\;:'",<.>\/?]{8,}$/)).messages({  'string.base': `Contraseña debe ser de tipo texto`,
@@ -48,7 +49,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.object({required:Joi.boolean(),costo:Joi.number()}),codigo_descuento:Joi.array().items(Joi.object({codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)}))
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.number(),codigo_descuento:Joi.array().items(Joi.object({veces_restantes:Joi.number(),codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)}))
 
 });
 export const querySchemaCreateEvent= Joi.object({
@@ -102,7 +103,7 @@ export const querySchemaValidarEntrada= Joi.object({
             nftId:Joi.number().required()
           });
           export const querySchemaBuy= Joi.object({codigo_descuento:Joi.string(),
-            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number(),active:Joi.boolean()}))
+            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.number()),distancia_comprada:Joi.number()
                 });
           export const querySchemaEditProfile= Joi.object({
                   first_name:Joi.string(),

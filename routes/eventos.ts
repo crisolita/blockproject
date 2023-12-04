@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth";
-import {   asignarDorsal, createEvent, getAll, getEvent, getInscripcionesByEvent, getNFTS, getNFTSByEventsVendidos, getNFTSByUser, updateEvent } from "../controllers/eventos";
+import {   asignarDorsal, createEvent, getAll, getAllInscripcionesCompradas, getAllInscripcionesVendidas, getEvent, getInscripcionesByEvent, getNFTS, getNFTSByEventsVendidos, getNFTSByUser, updateEvent } from "../controllers/eventos";
 import { isOrganizador } from "../middleware/isOrganizador";
 import Joivalidator from "express-joi-validation";
 const validator = Joivalidator.createValidator();
@@ -22,9 +22,10 @@ router.post("/", getAll);
 router.post("/event", getEvent);
 router.post("/nfts", authenticateToken,getNFTS);
 
-router.post("/nftsVendidos", authenticateToken,getNFTSByEventsVendidos);
-router.post("/nftsByUser", authenticateToken,getNFTSByUser);
-
+router.post("/nftsVendidosByEvent", authenticateToken,getNFTSByEventsVendidos);
+router.post("/nftsByUserByEvent", authenticateToken,getNFTSByUser);
+router.get("/nftsAllVendidos", authenticateToken,getAllInscripcionesVendidas);
+router.get("/nftsAllByUser", authenticateToken,getAllInscripcionesCompradas);
 router.post("/orders",authenticateToken,getInscripcionesByEvent)
 
 

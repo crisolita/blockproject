@@ -47,3 +47,12 @@ export async function sendToOrganizadorDorsalFaltante(email: string, nft_id:numb
   };
   return transporter.sendMail(mailData);
 }
+export async function sendCambiosEventos(email: string, evento:string) {
+  const mailData = {
+    from: process.env.EMAILADDRESS, // sender address
+    to: email, // list of receivers
+    subject: `El evento ${evento} ha cambiado`,
+    html: `<h2 style="color:#23262F;">Te sugerimos que entres a la plataforma para revisar los cambios del evento</h3>`
+  };
+  return transporter.sendMail(mailData);
+}

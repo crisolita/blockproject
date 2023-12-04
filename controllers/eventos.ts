@@ -6,6 +6,7 @@ import {
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import { getEntradaByEventoID } from "../service/entrada";
 import { uploadImage } from "../service/aws";
+import { sendCambiosEventos } from "../service/mail";
 
 
 export const createEvent = async (req: Request, res: Response) => {
@@ -115,6 +116,11 @@ export const updateEvent = async (req: Request, res: Response) => {
          await updateEvento(event.id,{banner_image:bannerPath},prisma)
         }
      
+      }
+      const nfts= await prisma.nfts.findMany({where:{eventoId:event.id}})
+      for (let nft of nfts) {
+        const comprador= await getUserById(nft.User_id,prisma)
+        if (comprador) await sendCambiosEventos(comprador.email,event.name)
       }
       res.json(updated);
     } else {
@@ -274,6 +280,45 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
   let orders= await prisma.orders.findMany({where:{eventoId:Number(event_id),active:true}})
   return res.json(orders)
 
+  } catch ( error ) {
+    console.log(error)
+    res.json({error });
+  }
+};
+export const getAllInscripcionesCompradas = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+  const user=await getUserById(USER.id,prisma);
+  if(!user) return res.status(404).json({error:"User no valido"})
+  let nfts= await prisma.nfts.findMany({where:{User_id:user.id}})
+  return res.json(nfts)
+  } catch ( error ) {
+    console.log(error)
+    res.json({error });
+  }
+};
+export const getAllInscripcionesVendidas = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+  const user=await getUserById(USER.id,prisma);
+  if(!user) return res.status(404).json({error:"User no valido"})
+  const eventos= await prisma.eventos.findMany()
+let nfts=[];
+for (let evento of eventos) {
+  if(evento?.creator_id!==USER.id) return res.status(404).json({error:"Evento no pertenece al usuario"}) 
+    let allnfts= await prisma.nfts.findMany({where:{eventoId:Number(evento.id)}})
+    for (let nft of allnfts ) {
+        if (nft.User_id==USER.id) continue
+        nfts.push(nft)
+    }
+}
+  return res.json(nfts)
   } catch ( error ) {
     console.log(error)
     res.json({error });

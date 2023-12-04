@@ -9,25 +9,37 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model orders {
-  id           Int       @id @default(autoincrement())
-  sellerID     Int
-  buyerId      Int?
-  nftId        Int
-  eventoId     Int
-  active       Boolean?
-  txHash       String?
-  createdAt    DateTime
-  completedAt  DateTime?
-  precio_usado Float?
-  adicionales String?
+  id                Int                  @id @default(autoincrement())
+  sellerID          Int
+  buyerId           Int?
+  nftId             Int
+  eventoId          Int
+  active            Boolean?
+  txHash            String?
+  createdAt         DateTime
+  completedAt       DateTime?
+  precio_usado      Float?
   adicionalesUsados String?
-  precio_batch String
-  license_required String?
-  codigo_descuento String?
-  Evento       Eventos?  @relation(fields: [eventoId], references: [id])
-  User         User      @relation(fields: [sellerID], references: [id])
-  Nfts         Nfts      @relation(fields: [nftId], references: [id])
+  precio_batch      String
+  license_required  Float?
+  adicionalesIds    Int[]        
+  codigo_descuento  String[]
+  Evento            Eventos?             @relation(fields: [eventoId], references: [id])
+  User              User                 @relation(fields: [sellerID], references: [id])
+}
+
+model codigos_descuentos {
+  cod             String   @id
+  porcentaje      Float
+  veces_restantes Int
+}
+
+model adicionales {
+  id       Int      @id @default(autoincrement())
+  concepto String
+  valor    Float
 }
 
 model MarketplaceConfig {
@@ -36,62 +48,63 @@ model MarketplaceConfig {
 }
 
 model Nfts {
-  User_id         Int?
-  id              Int         @id @unique
-  tipo            TicketTime?
-  eventoId        Int
-  txHash          String?
-  caducidadVenta  DateTime?
-  caducidadCanjeo DateTime?
-  marketplace     Boolean?
-  dorsal          String?
-  Evento          Eventos?    @relation(fields: [eventoId], references: [id])
-  User            User?       @relation(fields: [User_id], references: [id])
-  Orders          orders[]
+  User_id            Int
+  id                 Int         @id @unique
+  tipo               TicketTime?
+  eventoId           Int
+  txHash             String?
+  compradoAt         DateTime?
+  precio_usado       Float?
+  caducidadVenta     DateTime?
+  caducidadCanjeo    DateTime?
+  marketplace        Boolean?
+  dorsal             String?
+  distancia_comprada Float?
+  Evento             Eventos?    @relation(fields: [eventoId], references: [id])
+  User               User?       @relation(fields: [User_id], references: [id])
 }
 
 model User {
-  id                 Int       @id @default(autoincrement())
-  first_name         String?
-  last_name          String?
-  balance            Int?
-  email              String    @unique
-  password           String?
-  wallet             String    @unique
-  key                String
-  authToken          String?
-  acctStpId          String?
-  clientSecret       String?
-  tokenValidUntil    DateTime?
-  googleID           String?   @unique
-  user_rol           ROL
-  company_name       String?
-  company_cif        String?
-  descripcion        String?
-  foto_perfil        String?
-  instagram          String?
-  twitter            String?
-  facebook           String?
-  Nfts               Nfts[]
-  Orders             orders[]
-  Eventos            Eventos[]
-  Entrada            Entrada[]
-  userInfo           userInfo?
+  id              Int       @id @default(autoincrement())
+  first_name      String?
+  last_name       String?
+  balance         Int?
+  email           String    @unique
+  password        String?
+  wallet          String    @unique
+  key             String
+  authToken       String?
+  acctStpId       String?
+  clientSecret    String?
+  tokenValidUntil DateTime?
+  googleID        String?   @unique
+  user_rol        ROL
+  company_name    String?
+  company_cif     String?
+  descripcion     String?
+  foto_perfil     String?
+  instagram       String?
+  twitter         String?
+  facebook        String?
+  Nfts            Nfts[]
+  Orders          orders[]
+  Eventos         Eventos[]
+  Entrada         Entrada[]
+  userInfo        userInfo?
 }
 
-
 model userInfo {
-  user_id Int  @unique
-  documento Documento
-  numero_documento String
-  telefono String
+  user_id            Int       @unique
+  documento          Documento
+  numero_documento   String
+  telefono           String
   birth_date         DateTime
-  gender Genero
+  gender             Genero
   numero_de_licencia String?
-  direccion_postal String
-  talla_camisa   Talla
-  club    String?
-  user    User @relation(fields: [user_id], references: [id])
+  direccion_postal   String
+  talla_camisa       Talla
+  club               String?
+  user               User      @relation(fields: [user_id], references: [id])
 }
 
 model RequestOrganizador {
@@ -139,10 +152,12 @@ model Entrada {
   User        User?    @relation(fields: [user_id], references: [id])
   Evento      Eventos? @relation(fields: [evento_id], references: [id])
 }
+
 enum Modales {
   Triathlon
   Running
   Ciclismo
+  Natacion
 }
 
 enum TicketTime {
@@ -174,20 +189,23 @@ enum SubCategorias {
   Montanbike_MTB
   Gravel
 }
+
 enum Genero {
   MASCULINO
   FEMENINO
   OTROS
- }
- enum Talla {
+}
+
+enum Talla {
   XS
   S
   M
   L
   XL
   XXL
- }
- enum Documento {
+}
+
+enum Documento {
   PASAPORTE
   DNI
- }
+}
