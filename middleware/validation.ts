@@ -55,7 +55,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
 export const querySchemaCreateEvent= Joi.object({
   name:Joi.string().required(), place:Joi.string(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
   'Running',
-  'Ciclismo').required(), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
+  'Ciclismo','Natacion').required(), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
     'KM_10',
     'Media_maraton_21km',
     'Maraton_42km',
@@ -71,7 +71,7 @@ export const querySchemaEditEvent= Joi.object({
  
 event_id:Joi.number().required(), name:Joi.string(), place:Joi.string(), date:Joi.string(), modalidad:Joi.string().valid('Triathlon',
   'Running',
-  'Ciclismo'), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
+  'Ciclismo','Natacion'), instagram:Joi.string(), twitter:Joi.string(), facebook:Joi.string(), distancia:Joi.number(), subcategoria:Joi.string().valid('KM_5',
     'KM_10',
     'Media_maraton_21km',
     'Maraton_42km',

@@ -163,24 +163,6 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
         const txHash=await contract.connect(wallet).functions.mintBatch(user.wallet,cantidad,tipo=="Entrada"?0:1);
         let adicionalesIds=[]
         let codigos=[]
-        for (let i=Number(nftId);i<Number(nftId)+cantidad;i++) {
-          nftIDs.push(i);
-            // / create a NFT in BD
-            console.log(i)
-        const nft=await prisma.nfts.create({
-          data: {
-            User_id:user.id,
-            id:i,
-            caducidadVenta:new Date(caducidadVenta),
-            caducidadCanjeo:eventoId.date,
-            marketplace:marketplaceSell,
-            eventoId:eventoId,
-            tipo:"Entrada",
-            txHash:txHash.hash
-          },
-        });
-        nfts.push(nft)
-       
         if(adicionales) {
           for (let adicional of adicionales) {
             const crear= await prisma.adicionales.create({
@@ -206,6 +188,25 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
             codigos.push(crear.cod)
           }
         }
+        for (let i=Number(nftId);i<Number(nftId)+cantidad;i++) {
+          nftIDs.push(i);
+            // / create a NFT in BD
+            console.log(i)
+        const nft=await prisma.nfts.create({
+          data: {
+            User_id:user.id,
+            id:i,
+            caducidadVenta:new Date(caducidadVenta),
+            caducidadCanjeo:eventoId.date,
+            marketplace:marketplaceSell,
+            eventoId:eventoId,
+            tipo:"Entrada",
+            txHash:txHash.hash
+          },
+        });
+        nfts.push(nft)
+       
+   
         const order=await createOrder({sellerID:Number(user.id),
           nftId:i,
           eventoId:eventoId,
@@ -216,7 +217,16 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           license_required,
           codigo_descuento:codigos
           },prisma)
-        orders.push(order)
+        orders.push({
+          id:order.id,
+          nftId:i,
+          eventoId:eventoId,
+          precio_batch:JSON.stringify(priceBatch),
+          active:true,
+          createdAt:new Date(),
+          adicionales:adicionales,
+          license_required
+        })
         }
       
       
@@ -258,4 +268,21 @@ export const cancellSellNft = async (req: Request, res: Response) => {
   }
 };
 
+export const validarCodigo = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const {codigo,orderId} = req?.body;
+    let order = await getOrder(orderId,prisma)
+    if(!order?.codigo_descuento.includes(codigo)) return res.status(404).json({error:"Codigo no existe para esta orden"})
+    let cod= await prisma.codigos_descuentos.findUnique({where:{cod:codigo}})
+    if(!cod) return res.status(400).json({error:"Codigo no existe"})
+    return res.json({cod})
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};
 

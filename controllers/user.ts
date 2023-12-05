@@ -73,26 +73,29 @@ export const userLoginController = async (req: Request, res: Response) => {
     const now=moment()
     if(user) {
       const userInfo= await prisma.userInfo.findUnique({where:{user_id:user.id}})
-      if ( user.password && bcrypt.compareSync(password, user.password) && now.isAfter(moment(user?.tokenValidUntil))|| user.tokenValidUntil==null) {
-        await sendEmail(email, authCode);
-        await updateUserAuthToken(user.id,  {authToken:bcrypt.hashSync(authCode, salt)}, prisma);
-        return res.json(
-          {
-            data: `Se ha enviado código de validación al correo: ${email}`,
-          }
-        );
-      } else if(user && now.isBefore(moment(user?.tokenValidUntil))) {
-        return res.json(
-          { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,userInfo,token: createJWT(user) })
-        ;
-      } else {
-        res.status(404).json({error:"Contraseña incorrectos"});
-      }
-    }else  {
-      res.status(404).json({error:"Email incorrecto"});
-    }
+      if ( user.password && bcrypt.compareSync(password, user.password)) {
+        if(now.isAfter(moment(user?.tokenValidUntil))|| user.tokenValidUntil==null) {
+          await sendEmail(email, authCode);
   
-  } catch (error ) {
+          await updateUserAuthToken(user.id,  {authToken:bcrypt.hashSync(authCode, salt)}, prisma);
+          return res.json(
+            {
+              data: `Se ha enviado código de validación al correo: ${email}`,
+            }
+          );
+        } else if(now.isBefore(moment(user?.tokenValidUntil))) {
+          return res.json(
+            { email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,userInfo,token: createJWT(user) })
+          ;
+  
+        }
+      } else {
+        return res.status(400).json({error:"Contraseña incorrecta"})
+      }
+  } else {
+    return res.status(404).json({error:"Email incorrecto"})
+  } 
+}catch (error ) {
     res.status(500).json( error );
   }
 };

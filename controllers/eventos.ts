@@ -278,7 +278,23 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
   if(!user) return res.status(404).json({error:"User no valido"})
   const evento= await getEventoById(Number(event_id),prisma)
   let orders= await prisma.orders.findMany({where:{eventoId:Number(event_id),active:true}})
-  return res.json(orders)
+  let data=[]
+  for (let order of orders ) {
+    let adicionales=[];
+    for(let adicional of order.adicionalesIds) {
+      const data=await prisma.adicionales.findUnique({where:{id:adicional}})
+      adicionales.push(data)
+    }
+
+    data.push({nftId:order.nftId,
+    eventoId:order.eventoId,
+    precio_batch:order.precio_batch,
+    active:order.active,
+    createdAt:order.createdAt,
+    adicionales:adicionales,
+    license_required:order.license_required})
+  }
+  return res.json(data)
 
   } catch ( error ) {
     console.log(error)
