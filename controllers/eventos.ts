@@ -288,7 +288,7 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
 
     data.push({nftId:order.nftId,
     eventoId:order.eventoId,
-    precio_batch:order.precio_batch,
+    precio_batch:JSON.parse(order.precio_batch),
     active:order.active,
     createdAt:order.createdAt,
     adicionales:adicionales,

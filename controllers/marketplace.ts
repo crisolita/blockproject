@@ -55,7 +55,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento,distancia_comprada
+    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento
     } = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
@@ -126,8 +126,7 @@ export const buyNFT = async (req: Request, res: Response) => {
             User_id:buyer.id,
             txHash:transferFrom.hash,
             compradoAt: new Date(),
-            precio_usado:Number(priceActual),
-            distancia_comprada
+            precio_usado:Number(priceActual)
           }
         })
         return res.json(order);      
@@ -146,7 +145,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell ,adicionales,codigo_descuento,license_required} = req?.body;
+    const { cantidad,eventoId,tipo,priceBatch,caducidadVenta,marketplaceSell ,adicionales,codigo_descuento,license_required,preguntas} = req?.body;
     const user= await getUserById(USER.id,prisma);
     const event= await getEventoById(eventoId,prisma)
     if(!event) return res.status(404).json({error:"No event found"})

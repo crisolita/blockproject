@@ -24,7 +24,8 @@ model orders {
   adicionalesUsados String?
   precio_batch      String
   license_required  Float?
-  adicionalesIds    Int[]        
+  adicionalesIds    Int[]
+  preguntasIds      Int[]        
   codigo_descuento  String[]
   Evento            Eventos?             @relation(fields: [eventoId], references: [id])
   User              User                 @relation(fields: [sellerID], references: [id])
@@ -59,7 +60,6 @@ model Nfts {
   caducidadCanjeo    DateTime?
   marketplace        Boolean?
   dorsal             String?
-  distancia_comprada Float?
   Evento             Eventos?    @relation(fields: [eventoId], references: [id])
   User               User?       @relation(fields: [User_id], references: [id])
 }
@@ -105,6 +105,12 @@ model userInfo {
   talla_camisa       Talla
   club               String?
   user               User      @relation(fields: [user_id], references: [id])
+}
+
+model Preguntas {
+id              Int       @id @default(autoincrement())
+pregunta String
+respuestas String[]
 }
 
 model RequestOrganizador {
