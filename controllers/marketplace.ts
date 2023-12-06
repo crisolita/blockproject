@@ -162,6 +162,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
         const txHash=await contract.connect(wallet).functions.mintBatch(user.wallet,cantidad,tipo=="Entrada"?0:1);
         let adicionalesIds=[]
         let codigos=[]
+        let preguntasIds=[]
         if(adicionales) {
           for (let adicional of adicionales) {
             const crear= await prisma.adicionales.create({
@@ -171,6 +172,17 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
               }
             })
             adicionalesIds.push(crear.id)
+          }
+        }
+        if(preguntas) {
+          for (let pregunta of preguntas) {
+            const crear= await prisma.preguntas.create({
+              data:{
+                pregunta:pregunta.pregunta,
+                respuestas:pregunta.respuestas
+              }
+            })
+            preguntasIds.push(crear.id)
           }
         }
         if(codigo_descuento) {
@@ -213,6 +225,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           active:true,
           createdAt:new Date(),
           adicionalesIds:adicionalesIds,
+          preguntasIds,
           license_required,
           codigo_descuento:codigos
           },prisma)

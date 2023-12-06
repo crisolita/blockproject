@@ -35,6 +35,7 @@ export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaC
           createdAt:Date,
           license_required?:number,
           codigo_descuento?:string[],
+          preguntasIds?:number[],
           adicionalesIds?:number[]}, prisma: PrismaClient) => {
             return await prisma.orders.create({
               data: {
