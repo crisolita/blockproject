@@ -48,7 +48,6 @@ export const sellNFT = async (req: Request, res: Response) => {
   }
 };
 
-
 export const buyNFT = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
@@ -79,12 +78,13 @@ export const buyNFT = async (req: Request, res: Response) => {
       const fechaB = new Date(b.fecha_tope);
       return Number(fechaA) - Number(fechaB);
     });
-    
     for (let price of precios ) {
       if(now.isAfter(moment(new Date(price.fecha_tope)))) {
         priceActual=price.precio
       }
     }
+    console.log(precios)
+    console.log(priceActual,"primero")
     
     if(adicionales && order.adicionalesIds) {
       // let adicByUser=new Set(adicionales)
@@ -110,7 +110,6 @@ export const buyNFT = async (req: Request, res: Response) => {
   }
 }
 }
-console.log(actualResponse,"ressponde")
 
     if(order.license_required && !userInfo.numero_de_licencia) {
       priceActual+=order.license_required
@@ -124,6 +123,7 @@ console.log(actualResponse,"ressponde")
         await prisma.codigos_descuentos.update({where:{cod:codigo_descuento},data:{veces_restantes:cupon.veces_restantes-1}})
       }
     }
+    console.log(priceActual,"segundo")
 
     console.log(priceActual)
    
@@ -154,7 +154,7 @@ console.log(actualResponse,"ressponde")
         })
         return res.json(order);      
     } else  {
-      return res.json(({error:"Datos de comprador o vendedor faltantes"}));
+      return res.status(400).json(({error:"Datos de comprador o vendedor faltantes"}));
     }
 
   } catch (error) {
@@ -177,6 +177,8 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     let nfts=[]
     for (let precio of priceBatch) {
       if(!moment(precio.fecha_tope).isValid()) return res.status(400).json({error:"Fecha invalida en precio batch"})
+      if(moment(precio.fecha_tope).isBefore(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha invalida en precio batch"})
+
     }
     if(user && user.wallet && user.acctStpId) {
       ///mint NFT
