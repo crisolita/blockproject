@@ -49,8 +49,8 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.number(),codigo_descuento:Joi.array().items(Joi.object({veces_restantes:Joi.number(),codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)}))
-
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.number(),codigo_descuento:Joi.array().items(Joi.object({veces_restantes:Joi.number(),codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)})),
+  preguntas:Joi.array().items(Joi.object({pregunta:Joi.string(),respuestas:Joi.array().items(Joi.string())}))
 });
 export const querySchemaCreateEvent= Joi.object({
   name:Joi.string().required(), place:Joi.string(), date:Joi.string().required(), modalidad:Joi.string().valid('Triathlon',
@@ -103,7 +103,7 @@ export const querySchemaValidarEntrada= Joi.object({
             nftId:Joi.number().required()
           });
           export const querySchemaBuy= Joi.object({codigo_descuento:Joi.string(),
-            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.number())
+            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.number()),respuestas:Joi.array().items(Joi.object({pregunta:Joi.string(),respuesta:Joi.string()}))
                 });
           export const querySchemaEditProfile= Joi.object({
                   first_name:Joi.string(),

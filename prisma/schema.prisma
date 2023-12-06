@@ -59,6 +59,7 @@ model Nfts {
   caducidadVenta     DateTime?
   caducidadCanjeo    DateTime?
   marketplace        Boolean?
+  respuestas         String?
   dorsal             String?
   Evento             Eventos?    @relation(fields: [eventoId], references: [id])
   User               User?       @relation(fields: [User_id], references: [id])

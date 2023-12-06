@@ -281,12 +281,19 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
   let data=[]
   for (let order of orders ) {
     let adicionales=[];
+    let preguntas=[]
     for(let adicional of order.adicionalesIds) {
       const data=await prisma.adicionales.findUnique({where:{id:adicional}})
       adicionales.push(data)
     }
+    for(let pregunta of order.preguntasIds) {
+      const data=await prisma.preguntas.findUnique({where:{id:pregunta}})
+      preguntas.push(data)
+    }
 
-    data.push({nftId:order.nftId,
+    data.push({
+    orderId:order.id,  
+    nftId:order.nftId,
     eventoId:order.eventoId,
     precio_batch:JSON.parse(order.precio_batch),
     active:order.active,

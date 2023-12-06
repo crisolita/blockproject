@@ -55,7 +55,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento
+    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento,respuestas
     } = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
@@ -70,27 +70,47 @@ export const buyNFT = async (req: Request, res: Response) => {
     if(now.isAfter(moment(nft?.caducidadVenta))) return res.status(400).json({error:"Venta ha terminado"})
     const seller= await getUserById(order?.sellerID,prisma)
     let priceActual;
+    
     if(!order.precio_batch)  return res.status(404).json({error:"No hay precios asignados"})
+    
     let precios= JSON.parse(order.precio_batch)
     precios= precios.sort((a: { fecha_tope: string | number | Date; }, b: { fecha_tope: string | number | Date; }) => {
       const fechaA = new Date(a.fecha_tope);
       const fechaB = new Date(b.fecha_tope);
       return Number(fechaA) - Number(fechaB);
     });
+    
     for (let price of precios ) {
       if(now.isAfter(moment(new Date(price.fecha_tope)))) {
         priceActual=price.precio
       }
     }
+    
     if(adicionales && order.adicionalesIds) {
       // let adicByUser=new Set(adicionales)
       let adicByOrder=new Set(order.adicionalesIds)
     const interseccion= adicionales.filter((x: number)=>adicByOrder.has(x))
-     for (let inter of interseccion) {
+    
+    for (let inter of interseccion) {
      const adicional= await prisma.adicionales.findUnique({where:{id:inter}})
      priceActual+=adicional?.valor
     }
   }
+
+  let actualResponse=[]
+  if(respuestas && order.preguntasIds) {
+    // let adicByUser=new Set(adicionales)
+    for (let id of order.preguntasIds) {
+    let pregunta= await prisma.preguntas.findUnique({where:{id}})
+    const exist= respuestas.find((x:any)=>x.pregunta===pregunta?.pregunta)
+    console.log(exist,pregunta)
+    if (exist) {
+      if (pregunta?.respuestas.includes(exist.respuesta) ) 
+      actualResponse.push(exist)
+  }
+}
+}
+console.log(actualResponse,"ressponde")
 
     if(order.license_required && !userInfo.numero_de_licencia) {
       priceActual+=order.license_required
@@ -98,6 +118,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     if(codigo_descuento && order.codigo_descuento) {
       //validar que el codigo exista para la orden
       const cupon= await prisma.codigos_descuentos.findUnique({where:{cod:codigo_descuento}})
+     
       if(order.codigo_descuento.includes(codigo_descuento) && cupon && cupon.veces_restantes>0) {
         priceActual=priceActual-priceActual*cupon.porcentaje/100  
         await prisma.codigos_descuentos.update({where:{cod:codigo_descuento},data:{veces_restantes:cupon.veces_restantes-1}})
@@ -105,6 +126,7 @@ export const buyNFT = async (req: Request, res: Response) => {
     }
 
     console.log(priceActual)
+   
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
       //VALIDAR EL PAGO
         const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual*100).toString(),prisma)
@@ -126,6 +148,7 @@ export const buyNFT = async (req: Request, res: Response) => {
             User_id:buyer.id,
             txHash:transferFrom.hash,
             compradoAt: new Date(),
+            respuestas:JSON.stringify(actualResponse),
             precio_usado:Number(priceActual)
           }
         })
@@ -237,12 +260,13 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           active:true,
           createdAt:new Date(),
           adicionales:adicionales,
+          preguntas:preguntas,
           license_required
         })
         }
       
       
-      res.json({orders,nfts});
+      res.json({order:orders[0]});
     } else {
       res.status(404).json({ error: "User not valid" });
 
