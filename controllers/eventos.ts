@@ -5,7 +5,7 @@ import {
 } from "../service/user";
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import { getEntradaByEventoID } from "../service/entrada";
-import { uploadImage } from "../service/aws";
+import { getImage, uploadImage } from "../service/aws";
 import { sendCambiosEventos } from "../service/mail";
 
 
@@ -317,7 +317,23 @@ export const getAllInscripcionesCompradas = async (req: Request, res: Response) 
   const user=await getUserById(USER.id,prisma);
   if(!user) return res.status(404).json({error:"User no valido"})
   let nfts= await prisma.nfts.findMany({where:{User_id:user.id}})
-  return res.json(nfts)
+let data=[]
+nfts=nfts.filter((x)=>{
+  return x.compradoAt!=null
+})
+for (let nft of nfts) {
+  const evento=await getEventoById(nft.eventoId,prisma)
+  let image;
+  if(evento?.profile_image) {
+     image= await getImage(evento?.profile_image)
+  }
+  data.push({
+    nft,
+    name:evento?.name,
+    image:image
+  })
+}
+  return res.json(data)
   } catch ( error ) {
     console.log(error)
     res.json({error });
@@ -334,7 +350,7 @@ export const getAllInscripcionesVendidas = async (req: Request, res: Response) =
   const eventos= await prisma.eventos.findMany()
 let nfts=[];
 for (let evento of eventos) {
-  if(evento?.creator_id!==USER.id) return res.status(404).json({error:"Evento no pertenece al usuario"}) 
+  if(evento?.creator_id!==USER.id) continue
     let allnfts= await prisma.nfts.findMany({where:{eventoId:Number(evento.id)}})
     for (let nft of allnfts ) {
         if (nft.User_id==USER.id) continue
