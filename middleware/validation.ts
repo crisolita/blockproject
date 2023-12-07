@@ -103,7 +103,7 @@ export const querySchemaValidarEntrada= Joi.object({
             nftId:Joi.number().required()
           });
           export const querySchemaBuy= Joi.object({codigo_descuento:Joi.string(),
-            orderId:Joi.number().required(),cardNumber:Joi.string().required().min(12),exp_month:Joi.string().required(),exp_year:Joi.string().required(),cvc:Joi.string().required().length(3),adicionales:Joi.array().items(Joi.number()),respuestas:Joi.array().items(Joi.object({pregunta:Joi.string(),respuesta:Joi.string()}))
+            orderId:Joi.number().required(),adicionales:Joi.array().items(Joi.number()),respuestas:Joi.array().items(Joi.object({pregunta:Joi.string(),respuesta:Joi.string()}))
                 });
           export const querySchemaEditProfile= Joi.object({
                   first_name:Joi.string(),

@@ -5,7 +5,7 @@ import {
 } from "../service/user";
 import contract, {  wallet } from "../service/web3";
 import {  createOrder, getIfOrderIsActive, getNftsById, getNftsForOrder, getOrder } from "../service/marketplace";
-import { createCharge } from "../service/stripe";
+import { createCharge, createCheckoutSession } from "../service/stripe";
 import { getEventoById } from "../service/evento";
 import moment from "moment";
 export const sellNFT = async (req: Request, res: Response) => {
@@ -48,14 +48,13 @@ export const sellNFT = async (req: Request, res: Response) => {
   }
 };
 
-export const buyNFT = async (req: Request, res: Response) => {
+export const buyNFTfirstStep = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
      // @ts-ignore
      const USER = req.user as User;
-    const { orderId,cardNumber,exp_month,exp_year,cvc,adicionales,codigo_descuento,respuestas
-    } = req?.body;
+    const { orderId,adicionales,codigo_descuento,respuestas } = req?.body;
     let order = await getOrder(orderId,prisma)
     const buyer= await getUserById(USER.id,prisma)
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
@@ -110,7 +109,6 @@ export const buyNFT = async (req: Request, res: Response) => {
   }
 }
 }
-
     if(order.license_required && !userInfo.numero_de_licencia) {
       priceActual+=order.license_required
     }
@@ -128,31 +126,8 @@ export const buyNFT = async (req: Request, res: Response) => {
     console.log(priceActual)
    
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
-      //VALIDAR EL PAGO
-        // const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual*100).toString(),prisma)
-        // if(!charge) return res.json({error:"Pago con tarjeta ha fallado"})
-        const transferFrom= await contract.connect(wallet).functions.transferFrom(seller.wallet,buyer.wallet,order.nftId)
-        order=await prisma.orders.update({
-          where: { id: Number(order.id) },
-          data: {
-            active: false,
-            txHash:transferFrom.hash,
-            buyerId:buyer.id,
-            completedAt:new Date(),
-            adicionalesUsados:JSON.stringify(adicionales),
-            precio_usado:Number(priceActual)
-          },
-        })
-        await prisma.nfts.update({
-          where:{id:order.nftId}, data:{
-            User_id:buyer.id,
-            txHash:transferFrom.hash,
-            compradoAt: new Date(),
-            respuestas:JSON.stringify(actualResponse),
-            precio_usado:Number(priceActual)
-          }
-        })
-        return res.json(order);      
+    const session= await createCheckoutSession(seller.acctStpId,(priceActual*100).toString())
+    return res.json(session)
     } else  {
       return res.status(400).json(({error:"Datos de comprador o vendedor faltantes"}));
     }
@@ -329,3 +304,28 @@ export const validarCodigo = async (req: Request, res: Response) => {
   }
 };
 
+//VALIDAR EL PAGO
+        // const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual*100).toString(),prisma)
+        // if(!charge) return res.json({error:"Pago con tarjeta ha fallado"})
+        // const transferFrom= await contract.connect(wallet).functions.transferFrom(seller.wallet,buyer.wallet,order.nftId)
+        // order=await prisma.orders.update({
+        //   where: { id: Number(order.id) },
+        //   data: {
+        //     active: false,
+        //     txHash:transferFrom.hash,
+        //     buyerId:buyer.id,
+        //     completedAt:new Date(),
+        //     adicionalesUsados:JSON.stringify(adicionales),
+        //     precio_usado:Number(priceActual)
+        //   },
+        // })
+        // await prisma.nfts.update({
+        //   where:{id:order.nftId}, data:{
+        //     User_id:buyer.id,
+        //     txHash:transferFrom.hash,
+        //     compradoAt: new Date(),
+        //     respuestas:JSON.stringify(actualResponse),
+        //     precio_usado:Number(priceActual)
+        //   }
+        // })
+        // return res.json(order); 

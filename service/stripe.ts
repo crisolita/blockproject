@@ -50,4 +50,39 @@ export const createTransfer = async (receiverAccountId:string,amount:string,desc
     }
    
     };
+    export const createCheckoutSession = async (receiverAccountId:string, amount:string) => {
+      try {
+
+const price = await stripe.prices.create({
+  currency: 'eur',
+  unit_amount: amount,
+  product_data: {
+    name: 'Compra de inscripcion',
+  },
+});
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment',
+          line_items: [
+            {
+              price: price.id,
+              quantity: 1,
+            },
+          ],
+          payment_intent_data: {
+            application_fee_amount: 123,
+            transfer_data: {
+              destination: receiverAccountId,
+            },
+          },
+          success_url: 'https://example.com/success',
+          cancel_url: 'https://example.com/cancel',
+        });
+        return session.url
+      } catch(e) {
+        console.log(e)
+        return false
+      }
+     
+      };
+
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { buyNFT, createAndSellNFT, sellNFT, validarCodigo } from "../controllers/marketplace";
+import {  buyNFTfirstStep, createAndSellNFT, sellNFT, validarCodigo } from "../controllers/marketplace";
 import { authenticateToken } from "../middleware/auth";
 import { isOrganizador } from "../middleware/isOrganizador";
 import Joivalidator from "express-joi-validation";
@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/createNFT",validator.body(querySchemaCreateAndSellNFT),isOrganizador, createAndSellNFT);
 
 router.post("/sellNFT",validator.body(querySchemaSell),authenticateToken, sellNFT);
-router.post("/buyNFT",validator.body(querySchemaBuy),authenticateToken, buyNFT);
+router.post("/buyNFT",validator.body(querySchemaBuy),authenticateToken, buyNFTfirstStep);
 
 router.post("/validarCod", validarCodigo);
 
