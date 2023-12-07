@@ -145,13 +145,13 @@ export const changePasswordController = async (req: Request, res: Response) => {
         );
         return res.json({ email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif});
       } else
-        return res.json({ data: "Token 2fa incorrecto." });
+        return res.status(400).json({ data: "Token 2fa incorrecto." });
     } else {
-      res.json({error:"Usuario no existe"});
+      res.status(404).json({error:"Usuario no existe"});
     }
   } catch (error ) {
     console.log(error)
-    res.json({ error });
+    res.status(500).json({ error });
   }
 };
 export const recoverPasswordSendTokenController = async (
@@ -182,8 +182,8 @@ export const recoverPasswordSendTokenController = async (
         }
       );
     } else {
-      throw new Error("No existe el usuario");
-    }
+      return res.status(404).json({error:"Usuario no encontrado"})
+      }
   } catch (error ) {
     res.json({ error });
   }
