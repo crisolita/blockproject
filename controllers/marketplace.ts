@@ -186,7 +186,8 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
         const nftId= await contract.connect(wallet).functions.id()
         const txHash=await contract.connect(wallet).functions.mintBatch(user.wallet,cantidad,tipo=="Entrada"?0:1);
         let adicionalesIds=[]
-        let codigos=[]
+        let codigosUsados=[]
+        let codigosYaExiste=[]
         let preguntasIds=[]
         if(adicionales) {
           for (let adicional of adicionales) {
@@ -213,7 +214,10 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
         if(codigo_descuento) {
           for (let codigo of codigo_descuento) {
             const exist = await prisma.codigos_descuentos.findUnique({where:{cod:codigo.codigo}})
-           if(exist) continue
+           if(exist) { 
+            codigosYaExiste.push(exist) 
+            continue
+           }
             const crear= await prisma.codigos_descuentos.create({
               data:{
                 cod:codigo.codigo,
@@ -221,7 +225,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
                 veces_restantes:codigo.veces_restantes
               }
             })
-            codigos.push(crear.cod)
+            codigosUsados.push(crear.cod)
           }
         }
         for (let i=Number(nftId);i<Number(nftId)+cantidad;i++) {
@@ -252,7 +256,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           adicionalesIds:adicionalesIds,
           preguntasIds,
           license_required,
-          codigo_descuento:codigos
+          codigo_descuento:codigosUsados
           },prisma)
         orders.push({
           id:order.id,
@@ -263,12 +267,13 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           createdAt:new Date(),
           adicionales:adicionales,
           preguntas:preguntas,
-          license_required
+          license_required,
+          codigosYaExiste
         })
         }
       
       
-      res.json({order:orders[0]});
+      res.json(orders[0]);
     } else {
       res.status(404).json({ error: "User not valid" });
 
