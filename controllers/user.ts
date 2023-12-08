@@ -55,7 +55,7 @@ export const userRegisterController = async (req: Request, res: Response) => {
     }
   } catch (error ) {
     console.log(error)
-    res.json({ error });
+    res.status(500).json(error);
   }
 };
 
@@ -124,7 +124,7 @@ export const userTokenValidate = async (req: Request, res: Response) => {
     }
   } catch (error ) {
     console.log(error)
-    res.json( error );
+    res.status(500).json( error );
   }
 };
 export const changePasswordController = async (req: Request, res: Response) => {
@@ -185,7 +185,7 @@ export const recoverPasswordSendTokenController = async (
       return res.status(404).json({error:"Usuario no encontrado"})
       }
   } catch (error ) {
-    res.json({ error });
+    res.status(500).json({ error });
   }
 };
 
@@ -330,7 +330,7 @@ let info;
   }
   catch (error ) {
     console.log(error)
-    res.json({ error });
+    res.status(500).json(error);
   }
 };
 export const getUserInfo = async (req: Request, res: Response) => {

@@ -31,7 +31,7 @@ export const sellNFT = async (req: Request, res: Response) => {
           sellerID:Number(USER.id),
           nftId:nft.id,
           precio_batch:JSON.stringify(priceBatch),
-          active:true,
+          status:'venta_activa',
           eventoId:event?.id,
           createdAt: new Date()
         },
@@ -39,12 +39,12 @@ export const sellNFT = async (req: Request, res: Response) => {
       res.json(newOrder);
 
     } else  {
-      res.json(({data:"No NFT found or User not valid"}));
+      res.status(404).json({error:"No NFT found or User not valid"});
 
     }
   } catch (error) {
     console.log(error)
-    res.json(({ error }));
+    res.status(500).json(error);
   }
 };
 
@@ -60,7 +60,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
     if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
-    if(order.buyerId || order.completedAt || !order.active ) return res.json({error:"Order esta completa"})
+    if(order.buyerId || order.completedAt || order.status=="vendido" ) return res.status(400).json({error:"Order esta completa"})
     const event= await getEventoById(order.eventoId,prisma)
     const now= moment()
     if(!now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado o no ha empezado la venta"})
@@ -134,7 +134,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json(error);
   }
 };
 export const createAndSellNFT = async (req: Request, res: Response) => {
@@ -271,18 +271,18 @@ export const cancellSellNft = async (req: Request, res: Response) => {
     if ( order?.sellerID===user?.id && order) {
       await prisma.orders.update({ where:{id:orderId},
         data: {
-          active:false,
+          status:'vendido',
         },
       })
-      res.json(({data:"ORDEN DESACTIVADA"}));
+      res.json({data:"ORDEN DESACTIVADA"});
 
     } else  {
-      res.json(({data:"Order found!"}));
+      res.status(404).json({error:"Order found!"});
 
     }
   } catch (error) {
     console.log(error)
-    res.json(({ error }));
+    res.status(500).json(error);
   }
 };
 
@@ -300,10 +300,36 @@ export const validarCodigo = async (req: Request, res: Response) => {
     return res.json({cod})
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json({ error:error});
   }
 };
 
+export const confirmBuy = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const { orderId } = req?.body;
+    let order = await getOrder(orderId,prisma)
+    const buyer= await getUserById(USER.id,prisma)
+    const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
+    if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
+    if(!order) return res.status(404).json({error:"Orden no encontrada"})
+    if(order.buyerId || order.completedAt || order.status=="vendido" ) return res.status(400).json({error:"Order esta completa"})
+    const event= await getEventoById(order.eventoId,prisma)
+    const now= moment()
+    if(!now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado o no ha empezado la venta"})
+    const nft= await getNftsById(order.nftId,prisma)
+    const seller= await getUserById(order?.sellerID,prisma)
+  /// Cambiar order active por status  alaventa, pendientedepago, comprada
+    /// Validar pago de stripe
+
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};
 //VALIDAR EL PAGO
         // const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual*100).toString(),prisma)
         // if(!charge) return res.json({error:"Pago con tarjeta ha fallado"})

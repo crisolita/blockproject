@@ -16,7 +16,6 @@ model orders {
   buyerId           Int?
   nftId             Int
   eventoId          Int
-  active            Boolean?
   txHash            String?
   createdAt         DateTime
   completedAt       DateTime?
@@ -27,6 +26,8 @@ model orders {
   adicionalesIds    Int[]
   preguntasIds      Int[]        
   codigo_descuento  String[]
+  status            StatusOrder?
+  checkout_id       String?
   Evento            Eventos?             @relation(fields: [eventoId], references: [id])
   User              User                 @relation(fields: [sellerID], references: [id])
 }
@@ -76,6 +77,7 @@ model User {
   key             String
   authToken       String?
   acctStpId       String?
+  charge_enable   Boolean?
   clientSecret    String?
   tokenValidUntil DateTime?
   googleID        String?   @unique
@@ -181,6 +183,11 @@ enum StatusRequest {
   RECHAZADO
   APROBADO
   PENDIENTE
+}
+enum StatusOrder {
+  venta_activa
+  pago_pendiente
+  vendido
 }
 
 enum SubCategorias {

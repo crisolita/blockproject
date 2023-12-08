@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth";
-import {  createVerifySession, onboardLink, webhookControler } from "../controllers/stripe";
+import {   onboardLink, validateDataOnboarding, webhookControler } from "../controllers/stripe";
 import bodyParser from "body-parser";
 
 const router = express.Router();
@@ -10,7 +10,7 @@ router.post("/onBoard", authenticateToken, onboardLink);
 
 
 /// KNOW YOUR CLIENT
-router.post("/create-verification-session", authenticateToken, createVerifySession);
+router.post("/verify-onboard", authenticateToken, validateDataOnboarding);
 router.post("/webhook",bodyParser.raw({type: 'application/json'}), authenticateToken, webhookControler);
 
 

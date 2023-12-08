@@ -23,7 +23,7 @@ export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaC
         });
         let actives= orders.filter((x)=>
         {
-          return x.active
+          return x.status=='venta_activa'
         })
         if(actives.length==0) return false
         };

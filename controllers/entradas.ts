@@ -26,15 +26,15 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     const owner= await contract.functions.ownerOf(nftId)
     const entradaExist=await getEntradaByNFTID(nftId,prisma)
     if(entradaExist) return res.status(400).json({error:"Entrada existe"})
-    if(!user) return res.json({error:"Usuario no encontrado"})
-    if(nft?.User_id!=user?.id || owner[0]!=user?.wallet) return res.json({error:"No es dueño del NFT"})
+    if(!user) return res.status(404).json({error:"Usuario no encontrado"})
+    if(nft?.User_id!=user?.id || owner[0]!=user?.wallet) return res.status(400).json({error:"No es dueño del NFT"})
     const tokenData= await contract.functions.getTokenData(nftId)
   if(nft?.tipo!="Entrada" || tokenData[0].tipo!=0 ) return res.json({error:"No es una entrada valida"})
   const evento = await getEventoById(nft?.eventoId,prisma)
 const now= moment()
 if(now.isAfter(moment(nft.caducidadCanjeo))) return res.status(400).json({error:"Ha caducido el canjeo de este NFT"})
 //Validar que la entrada no exista con el nft_id
-if(!evento) return res.json({error:"No se ha encontrado el evento"})
+if(!evento) return res.status(400).json({error:"No se ha encontrado el evento"})
 const creator= await getUserById(evento.creator_id,prisma)
 if(!nft.dorsal) {
  if(creator) await sendToOrganizadorDorsalFaltante(creator.email,nft.id)
@@ -110,7 +110,7 @@ return res.json(entrada)
   } catch (error) {
     
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json({ error:error});
   }
 };
 export const validarEntrada = async (req: Request, res: Response) => {
@@ -135,7 +135,7 @@ export const validarEntrada = async (req: Request, res: Response) => {
     return res.json(entrada)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json({ error:error});
   }
 };
 
@@ -156,7 +156,7 @@ export const getEntradas = async (req: Request, res: Response) => {
     return res.json(data)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json({ error:error});
   }
 };
 

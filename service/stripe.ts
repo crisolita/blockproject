@@ -74,8 +74,8 @@ const price = await stripe.prices.create({
               destination: receiverAccountId,
             },
           },
-          success_url: 'https://example.com/success',
-          cancel_url: 'https://example.com/cancel',
+          success_url: 'https://4races.com/success',
+          cancel_url: 'https://4races.com/cancel',
         });
         return session.url
       } catch(e) {

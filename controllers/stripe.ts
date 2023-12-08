@@ -11,7 +11,7 @@ export const onboardLink = async (req: Request, res: Response) => {
        // @ts-ignore
        const USER = req.user as User;
        const user= await getUserById(USER.id,prisma)
-       if(!user) return res.json({error: "User no encontrado"})
+       if(!user) return res.status(404).json({error: "User no encontrado"})
       //  if(user.acctStpId) return res.json ({error:"Usuario ya tiene accountID"})
        const account = await stripe.accounts.create({
         type: 'standard',
@@ -35,27 +35,23 @@ export const onboardLink = async (req: Request, res: Response) => {
     res.status(500).json({error:e})
   }
 }
-export const createVerifySession= async (req:Request,res: Response) => {
+export const validateDataOnboarding= async (req:Request,res: Response) => {
 try {
    // @ts-ignore
    const prisma = req.prisma as PrismaClient;
    // @ts-ignore
    const USER = req.user as User;
    const user= await getUserById(USER.id,prisma)
-   if(!user) return res.json({error: "User no encontrado"})
+   if(!user) return res.status(404).json({error: "User no encontrado"})
 // Create the session.
-const verificationSession = await stripe.identity.verificationSessions.create({
-  type: 'document',
-  metadata: {
-    user_id: user.id,
-  },
-});
-
-// Return only the client secret to the frontend.
-const clientSecret = verificationSession.client_secret;
-// save the clientSecret asociated with an user 
-await updateUser(user.id,clientSecret,prisma);
-return res.json({data:clientSecret})
+const verify = await stripe.accounts.retrieve(user.acctStpId)
+let data;
+if(verify.charges_enabled || verify.details_submitted) {
+  // generarle un nuevo link? para que pueda subir su data
+} else  {
+//data completa poner en el user info que la data esta completa y puede vender
+}
+return res.json(data)
 } catch (e) {
   console.log(e)
   res.status(500).json({error:e})

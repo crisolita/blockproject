@@ -117,11 +117,18 @@ export const updateEvent = async (req: Request, res: Response) => {
         }
      
       }
-      const nfts= await prisma.nfts.findMany({where:{eventoId:event.id}})
-      for (let nft of nfts) {
-        const comprador= await getUserById(nft.User_id,prisma)
-        if (comprador) await sendCambiosEventos(comprador.email,event.name)
+      let orders= await prisma.orders.findMany({where:{eventoId:event.id,status:'vendido'}})
+      let buyers: number[]=[];
+      orders.forEach((x)=>{
+        if(x.buyerId && !buyers.includes(x.buyerId)) {
+          buyers.push(x.buyerId)
+        }
+      })
+      for (let buy of buyers) {
+        const user= await getUserById(buy,prisma)
+        if (user) await sendCambiosEventos(user.email,event.name)
       }
+      
       res.json(updated);
     } else {
       res.status(400).json({ error: "User not valid" });
@@ -157,7 +164,7 @@ export const updateEvent = async (req: Request, res: Response) => {
 
 //   } catch ( error ) {
 //     console.log(error)
-//     res.json({error });
+//     res.status(500).json(error );
 //   }
 // };
 export const getAll = async (req: Request, res: Response) => {
@@ -171,7 +178,7 @@ export const getAll = async (req: Request, res: Response) => {
 
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json({error });
   }
 };
 export const getEvent = async (req: Request, res: Response) => {
@@ -185,7 +192,7 @@ export const getEvent = async (req: Request, res: Response) => {
 
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json({error });
   }
 };
 
@@ -205,7 +212,7 @@ export const getNFTS = async (req: Request, res: Response) => {
     return res.json(nfts)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json(error);
   }
 };
 export const getNFTSByUser = async (req: Request, res: Response) => {
@@ -221,7 +228,7 @@ export const getNFTSByUser = async (req: Request, res: Response) => {
     return res.json(nfts)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json(error);
   }
 };
 
@@ -241,7 +248,7 @@ export const asignarDorsal = async (req: Request, res: Response) => {
   return res.json(nft)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json(error);
   }
 };
 export const getNFTSByEventsVendidos = async (req: Request, res: Response) => {
@@ -264,7 +271,7 @@ export const getNFTSByEventsVendidos = async (req: Request, res: Response) => {
     return res.json(nfts)
   } catch (error) {
     console.log(error)
-    res.json({ error:error});
+    res.status(500).json(error);
   }
 };
 export const getInscripcionesByEvent = async (req: Request, res: Response) => {
@@ -277,7 +284,7 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
   const user=await getUserById(USER.id,prisma);
   if(!user) return res.status(404).json({error:"User no valido"})
   const evento= await getEventoById(Number(event_id),prisma)
-  let orders= await prisma.orders.findMany({where:{eventoId:Number(event_id),active:true}})
+  let orders= await prisma.orders.findMany({where:{eventoId:Number(event_id),status:"venta_activa"}})
   let data=[]
   for (let order of orders ) {
     let adicionales=[];
@@ -296,16 +303,17 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
     nftId:order.nftId,
     eventoId:order.eventoId,
     precio_batch:JSON.parse(order.precio_batch),
-    active:order.active,
+    status:order.status,
     createdAt:order.createdAt,
     adicionales:adicionales,
+    preguntas:preguntas,
     license_required:order.license_required})
   }
   return res.json(data)
 
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json(error);
   }
 };
 export const getAllInscripcionesCompradas = async (req: Request, res: Response) => {
@@ -336,7 +344,7 @@ for (let nft of nfts) {
   return res.json(data)
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json(error);
   }
 };
 export const getAllInscripcionesVendidas = async (req: Request, res: Response) => {
@@ -360,6 +368,6 @@ for (let evento of eventos) {
   return res.json(nfts)
   } catch ( error ) {
     console.log(error)
-    res.json({error });
+    res.status(500).json(error);
   }
 };
