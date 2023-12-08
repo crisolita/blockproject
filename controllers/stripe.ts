@@ -18,7 +18,7 @@ export const onboardLink = async (req: Request, res: Response) => {
       });
       await updateUser(user.id,{acctStpId:account.id},prisma);
       //. aqui deberia ser req.headers.origin
-    const origin = 'http://localhost:3000/stripe';
+    const origin = 'https://4races.com/stripe';
     console.log(origin)
     const accountLink = await stripe.accountLinks.create({
       type: "account_onboarding",
@@ -46,10 +46,20 @@ try {
 // Create the session.
 const verify = await stripe.accounts.retrieve(user.acctStpId)
 let data;
-if(verify.charges_enabled || verify.details_submitted) {
+if(!verify.charges_enabled || !verify.details_submitted) {
+  const origin = 'https://4races.com/stripe';
+
   // generarle un nuevo link? para que pueda subir su data
+   data= await  stripe.accountLinks.create({
+    type: "account_onboarding",
+    account: user.acctStpId,
+    refresh_url: `${origin}/onboard-user/refresh`,
+    return_url: `${origin}/success.html`,
+  });
 } else  {
 //data completa poner en el user info que la data esta completa y puede vender
+await updateUser(USER.id,{charges_enabled:true},prisma)
+data="Onboarding exitoso!!"
 }
 return res.json(data)
 } catch (e) {

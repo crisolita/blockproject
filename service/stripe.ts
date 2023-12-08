@@ -77,7 +77,7 @@ const price = await stripe.prices.create({
           success_url: 'https://4races.com/success',
           cancel_url: 'https://4races.com/cancel',
         });
-        return session.url
+        return session
       } catch(e) {
         console.log(e)
         return false
@@ -85,4 +85,14 @@ const price = await stripe.prices.create({
      
       };
 
+      export const validateCheckout = async (checkout_id:string) => {
+        try {
+          const session = await stripe.checkout.sessions.retrieve(checkout_id)
+          return session
+        } catch(e) {
+          console.log(e)
+          return false
+        }
+       
+        };
 

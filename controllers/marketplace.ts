@@ -5,7 +5,7 @@ import {
 } from "../service/user";
 import contract, {  wallet } from "../service/web3";
 import {  createOrder, getIfOrderIsActive, getNftsById, getNftsForOrder, getOrder } from "../service/marketplace";
-import { createCharge, createCheckoutSession } from "../service/stripe";
+import { createCharge, createCheckoutSession, validateCheckout } from "../service/stripe";
 import { getEventoById } from "../service/evento";
 import moment from "moment";
 export const sellNFT = async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
     if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
-    if(order.buyerId || order.completedAt || order.status=="vendido" ) return res.status(400).json({error:"Order esta completa"})
+    if(order.buyerId || order.completedAt || order.status!=="venta_activa" ) return res.status(400).json({error:"Order esta completa"})
     const event= await getEventoById(order.eventoId,prisma)
     const now= moment()
     if(!now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado o no ha empezado la venta"})
@@ -127,7 +127,8 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
    
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
     const session= await createCheckoutSession(seller.acctStpId,(priceActual*100).toString())
-    return res.json(session)
+    await prisma.orders.update({where:{id:order.id},data:{checkout_id:session.id,status:"pago_pendiente",buyerId:USER.id}})
+    return res.json(session.url)
     } else  {
       return res.status(400).json(({error:"Datos de comprador o vendedor faltantes"}));
     }
@@ -316,42 +317,65 @@ export const confirmBuy = async (req: Request, res: Response) => {
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
     if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
-    if(order.buyerId || order.completedAt || order.status=="vendido" ) return res.status(400).json({error:"Order esta completa"})
-    const event= await getEventoById(order.eventoId,prisma)
-    const now= moment()
-    if(!now.isBetween(moment(event?.fecha_inicio_venta),moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado o no ha empezado la venta"})
-    const nft= await getNftsById(order.nftId,prisma)
+    if(order.buyerId || order.completedAt || order.status!="pago_pendiente" || buyer?.id!=order.buyerId ) return res.status(400).json({error:"Order esta completa"})
     const seller= await getUserById(order?.sellerID,prisma)
-  /// Cambiar order active por status  alaventa, pendientedepago, comprada
+
     /// Validar pago de stripe
+//retrieve the payment
+if(order.checkout_id) {
+  const paid= await validateCheckout(order.checkout_id)
+  console.log(paid)
+  if(paid.payment_status=="paid") {
+     const transferFrom= await contract.connect(wallet).functions.transferFrom(seller?.wallet,buyer?.wallet,order.nftId)
+        order=await prisma.orders.update({
+          where: { id: Number(order.id) },
+          data: {
+            status: 'vendido',
+            txHash:transferFrom.hash,
+            buyerId:buyer?.id,
+            completedAt:new Date()
+          },
+        })
+        await prisma.nfts.update({
+          where:{id:order.nftId}, data:{
+            User_id:buyer?.id,
+            txHash:transferFrom.hash,
+            compradoAt: new Date()
+          }
+        })
+        return res.json(order)
+  }
+} else return res.status(404).json({error:"No hay pago abierto"})
+  } catch (error) {
+    console.log(error)
+    res.json({ error:error});
+  }
+};
+export const cancelBuy = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+     // @ts-ignore
+     const USER = req.user as User;
+    const { orderId } = req?.body;
+    let order = await getOrder(orderId,prisma)
+    const buyer= await getUserById(USER.id,prisma)
+    if(buyer?.id!=order?.buyerId)  return res.status(400).json({error:"User no es el comprador"})
+    if(!order) return res.status(404).json({error:"Orden no encontrada"})
+    if(order.buyerId || order.completedAt || order.status!="pago_pendiente" ) return res.status(400).json({error:"Order esta completa"})
+  order= await prisma.orders.update({
+    where: { id: Number(order.id) },
+    data: {
+      status: 'venta_activa',
+      buyerId:null,
+      completedAt:null,
+      checkout_id:null
+    },
+  })
+  res.json(order)
 
   } catch (error) {
     console.log(error)
     res.json({ error:error});
   }
 };
-//VALIDAR EL PAGO
-        // const charge=await createCharge(buyer.id,seller.acctStpId,cardNumber,exp_month,exp_year,cvc,(priceActual*100).toString(),prisma)
-        // if(!charge) return res.json({error:"Pago con tarjeta ha fallado"})
-        // const transferFrom= await contract.connect(wallet).functions.transferFrom(seller.wallet,buyer.wallet,order.nftId)
-        // order=await prisma.orders.update({
-        //   where: { id: Number(order.id) },
-        //   data: {
-        //     active: false,
-        //     txHash:transferFrom.hash,
-        //     buyerId:buyer.id,
-        //     completedAt:new Date(),
-        //     adicionalesUsados:JSON.stringify(adicionales),
-        //     precio_usado:Number(priceActual)
-        //   },
-        // })
-        // await prisma.nfts.update({
-        //   where:{id:order.nftId}, data:{
-        //     User_id:buyer.id,
-        //     txHash:transferFrom.hash,
-        //     compradoAt: new Date(),
-        //     respuestas:JSON.stringify(actualResponse),
-        //     precio_usado:Number(priceActual)
-        //   }
-        // })
-        // return res.json(order); 
