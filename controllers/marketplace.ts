@@ -153,7 +153,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     let nfts=[]
     for (let precio of priceBatch) {
       if(!moment(precio.fecha_tope).isValid()) return res.status(400).json({error:"Fecha invalida en precio batch"})
-      if(moment(precio.fecha_tope).isBefore(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha invalida en precio batch"})
+      if(moment(precio.fecha_tope).isAfter(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha invalida en precio batch"})
 
     }
     if(user && user.wallet && user.acctStpId) {
@@ -227,7 +227,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           nftId:i,
           eventoId:eventoId,
           precio_batch:JSON.stringify(priceBatch),
-          active:true,
+          status:'venta_activa',
           createdAt:new Date(),
           adicionalesIds:adicionalesIds,
           preguntasIds,
@@ -239,7 +239,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
           nftId:i,
           eventoId:eventoId,
           precio_batch:JSON.stringify(priceBatch),
-          active:true,
+          status:order.status,
           createdAt:new Date(),
           adicionales:adicionales,
           preguntas:preguntas,
@@ -317,7 +317,8 @@ export const confirmBuy = async (req: Request, res: Response) => {
     const userInfo= await prisma.userInfo.findUnique({where:{user_id:buyer?.id}})
     if(!userInfo) return res.status(404).json({error:"Usuario no puede comprar por falta de informacion"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
-    if(order.buyerId || order.completedAt || order.status!="pago_pendiente" || buyer?.id!=order.buyerId ) return res.status(400).json({error:"Order esta completa"})
+    console.log(order.completedAt,"cc", order.status!="pago_pendiente","", buyer?.id!=order.buyerId)
+    if( order.completedAt || order.status!="pago_pendiente" || buyer?.id!=order.buyerId ) return res.status(400).json({error:"Order esta completa"})
     const seller= await getUserById(order?.sellerID,prisma)
 
     /// Validar pago de stripe
@@ -362,7 +363,7 @@ export const cancelBuy = async (req: Request, res: Response) => {
     const buyer= await getUserById(USER.id,prisma)
     if(buyer?.id!=order?.buyerId)  return res.status(400).json({error:"User no es el comprador"})
     if(!order) return res.status(404).json({error:"Orden no encontrada"})
-    if(order.buyerId || order.completedAt || order.status!="pago_pendiente" ) return res.status(400).json({error:"Order esta completa"})
+    if( order.completedAt || order.status!="pago_pendiente" ) return res.status(400).json({error:"Order esta completa"})
   order= await prisma.orders.update({
     where: { id: Number(order.id) },
     data: {

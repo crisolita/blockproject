@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, StatusOrder } from "@prisma/client";
 
 export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaClient) => {
   const nft=await prisma.nfts.findUnique({
@@ -31,7 +31,7 @@ export const getNftsForOrder = async (id: string, userId:string, prisma: PrismaC
           nftId:number,
           eventoId:number,
           precio_batch:string,
-          active:true,
+          status:StatusOrder,
           createdAt:Date,
           license_required?:number,
           codigo_descuento?:string[],
