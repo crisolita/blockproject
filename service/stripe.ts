@@ -50,7 +50,7 @@ export const createTransfer = async (receiverAccountId:string,amount:string,desc
     }
    
     };
-    export const createCheckoutSession = async (receiverAccountId:string, amount:string) => {
+    export const createCheckoutSession = async (receiverAccountId:string, amount:string,orderId:number) => {
       try {
 
 const price = await stripe.prices.create({
@@ -74,8 +74,8 @@ const price = await stripe.prices.create({
               destination: receiverAccountId,
             },
           },
-          success_url: 'https://4races.com/success',
-          cancel_url: 'https://4races.com/cancel',
+          success_url: `https://4races.com/success/${orderId}`,
+          cancel_url: `https://4races.com/cancel/${orderId}`,
         });
         return session
       } catch(e) {

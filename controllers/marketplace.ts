@@ -126,7 +126,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     console.log(priceActual)
    
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
-    const session= await createCheckoutSession(seller.acctStpId,(priceActual*100).toString())
+    const session= await createCheckoutSession(seller.acctStpId,(priceActual*100).toString(),order.id)
     await prisma.orders.update({where:{id:order.id},data:{checkout_id:session.id,status:"pago_pendiente",buyerId:USER.id}})
     return res.json(session.url)
     } else  {
