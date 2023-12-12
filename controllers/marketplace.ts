@@ -150,7 +150,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     if(!event) return res.status(404).json({error:"No event found"})
     if(event.creator_id!==user?.id) return res.status(400).json({error:"user no ha creado el evento"})
     const now= moment()
-    if(!now.isAfter(moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado la venta"})
+    if(now.isAfter(moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado la venta"})
     let orders=[]
     let nfts=[]
 
