@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { getUserById } from "./user";
 import { LargeNumberLike } from "crypto";
-const stripe = require('stripe')(process.env.SK_TEST);
+const stripe = require('stripe')(process.env.SK_LIVE);
 
 export const createTransfer = async (receiverAccountId:string,amount:string,description:string, prisma: PrismaClient) => {
   const transfer = await stripe.transfers.create({

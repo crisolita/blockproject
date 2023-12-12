@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { getUserById, updateUser } from "../service/user";
 import { createCharge } from "../service/stripe";
-const stripe = require('stripe')(process.env.SK_TEST);
+const stripe = require('stripe')(process.env.SK_LIVE);
 const endpointSecret=process.env.WEBHOOKSECRET_TEST;
 export const onboardLink = async (req: Request, res: Response) => {
   try {
