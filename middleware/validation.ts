@@ -49,7 +49,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({
     precio:Joi.number().required(),
     fecha_tope:Joi.string().required()
-  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number()})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.number(),codigo_descuento:Joi.array().items(Joi.object({veces_restantes:Joi.number(),codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)})),
+  })),adicionales:Joi.array().items(Joi.object({concepto:Joi.string(),valor:Joi.number().min(1)})),caducidadVenta:Joi.string(),marketplaceSell:Joi.boolean(),license_required:Joi.number().min(0),codigo_descuento:Joi.array().items(Joi.object({veces_restantes:Joi.number().min(1),codigo:Joi.string(),porcentaje:Joi.number().max(100).min(1)})),
   preguntas:Joi.array().items(Joi.object({pregunta:Joi.string(),respuestas:Joi.array().items(Joi.string())}))
 });
 export const querySchemaCreateEvent= Joi.object({

@@ -284,32 +284,37 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
   const user=await getUserById(USER.id,prisma);
   if(!user) return res.status(404).json({error:"User no valido"})
   const evento= await getEventoById(Number(event_id),prisma)
-  let orders= await prisma.orders.findMany({where:{eventoId:Number(event_id),status:"venta_activa"}})
+  let order= await prisma.orders.findFirst({where:{eventoId:Number(event_id),status:"venta_activa"}})
   let data=[]
-  for (let order of orders ) {
     let adicionales=[];
     let preguntas=[]
-    for(let adicional of order.adicionalesIds) {
-      const data=await prisma.adicionales.findUnique({where:{id:adicional}})
-      adicionales.push(data)
-    }
-    for(let pregunta of order.preguntasIds) {
-      const data=await prisma.preguntas.findUnique({where:{id:pregunta}})
-      preguntas.push(data)
-    }
+    if(order) {
+      if(order?.adicionalesIds){
+        for(let adicional of order.adicionalesIds) {
+          const data=await prisma.adicionales.findUnique({where:{id:adicional}})
+          adicionales.push(data)
+        }
+      }
+      if(order?.preguntasIds) {
+        for(let pregunta of order.preguntasIds) {
+          const data=await prisma.preguntas.findUnique({where:{id:pregunta}})
+          preguntas.push(data)
+        }
+      }
+  
+      data=
+      [{orderId:order.id,  
+      nftId:order.nftId,
+      eventoId:order.eventoId,
+      precio_batch:JSON.parse(order.precio_batch),
+      status:order.status,
+      createdAt:order.createdAt,
+      adicionales:adicionales,
+      preguntas:preguntas,
+      license_required:order.license_required}]
 
-    data.push({
-    orderId:order.id,  
-    nftId:order.nftId,
-    eventoId:order.eventoId,
-    precio_batch:JSON.parse(order.precio_batch),
-    status:order.status,
-    createdAt:order.createdAt,
-    adicionales:adicionales,
-    preguntas:preguntas,
-    license_required:order.license_required})
-  }
-  return res.json(data)
+      return res.json(data)
+    } else return res.json({data:"No hay ordenes a la venta para este evento"})
 
   } catch ( error ) {
     console.log(error)
