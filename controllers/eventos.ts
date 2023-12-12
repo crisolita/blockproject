@@ -244,6 +244,9 @@ export const asignarDorsal = async (req: Request, res: Response) => {
     if(!user) return res.status(404).json({error:"User no valido"})
     let nft= await prisma.nfts.findUnique({where:{id:nft_id}})
   if(!nft ) return res.status(404).json({error:"NFT inexistente"})
+/// VALIDAR QUE DORSAL SEA UNICO EN EL EVENTO
+    const dorsal= await prisma.nfts.findFirst({where:{eventoId:nft.eventoId,dorsal:dorsal_number}})
+    if(dorsal) return res.status(400).json({error:"Dorsal ya ha sido agregado para otra inscripcion en este evento"})
     nft= await prisma.nfts.update({where:{id:nft_id},data:{dorsal:dorsal_number}})
   return res.json(nft)
   } catch (error) {
