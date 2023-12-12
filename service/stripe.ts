@@ -96,3 +96,14 @@ const price = await stripe.prices.create({
        
         };
 
+
+      export const getBalance = async (acctStpId:string) => {
+        try {
+          const balance = await stripe.balance.retrieve(acctStpId)
+          return balance
+        } catch(e) {
+          console.log(e)
+          return false
+        }
+       
+        };
