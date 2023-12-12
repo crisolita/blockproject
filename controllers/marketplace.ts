@@ -154,10 +154,9 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     let orders=[]
     let nfts=[]
 
+    if(moment(priceBatch[0].fecha_tope).isAfter(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha tope es despues de fecha inicio de venta"})
     for (let precio of priceBatch) {
       if(!moment(precio.fecha_tope).isValid()) return res.status(400).json({error:"Fecha invalida en precio batch"})
-      if(moment(precio.fecha_tope).isAfter(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha tope es despues de fecha inicio de venta"})
-
     }
     if(user && user.wallet && user.acctStpId) {
       ///mint NFT
