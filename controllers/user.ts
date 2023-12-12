@@ -342,7 +342,7 @@ export const getUserInfo = async (req: Request, res: Response) => {
     const user= await getUserById(USER.id,prisma)
    if(!user) return res.status(404).json({error:"Usuario no encontrado"})
    const userInfo= await prisma.userInfo.findUnique({where:{user_id:user.id}})
-    return res.json({userInfo,email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,token: createJWT(user)})
+    return res.json({userInfo,email:user.email,id:user.id,googleId:user.id,first_name:user.first_name,last_name:user.last_name,user_rol:user.user_rol,company_name:user.company_name,company_cif:user.company_cif, instagram:user.instagram,facebook:user.facebook,descripcion:user.descripcion,twitter:user.twitter,foto_perfil:user.foto_perfil,acctStpId:user.acctStpId,charge_enabled:user.charge_enable,token: createJWT(user)})
   } catch(error) {
     console.log(error)
     return res.status(500).json({ error: error });

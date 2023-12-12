@@ -127,7 +127,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
    
     if(buyer && buyer.wallet && seller?.acctStpId && priceActual) {
     const session= await createCheckoutSession(seller.acctStpId,(priceActual*100).toString(),order.id)
-    await prisma.orders.update({where:{id:order.id},data:{checkout_id:session.id,status:"pago_pendiente",buyerId:USER.id}})
+    await prisma.orders.update({where:{id:order.id},data:{checkout_id:session.id,status:"pago_pendiente",buyerId:USER.id,precio_usado:priceActual}})
     return res.json(session.url)
     } else  {
       return res.status(400).json(({error:"Datos de comprador o vendedor faltantes"}));
@@ -149,8 +149,11 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
     const event= await getEventoById(eventoId,prisma)
     if(!event) return res.status(404).json({error:"No event found"})
     if(event.creator_id!==user?.id) return res.status(400).json({error:"user no ha creado el evento"})
+    const now= moment()
+    if(!now.isAfter(moment(event?.fecha_final_venta))) return res.status(400).json({error:"Ha finalizado la venta"})
     let orders=[]
     let nfts=[]
+
     for (let precio of priceBatch) {
       if(!moment(precio.fecha_tope).isValid()) return res.status(400).json({error:"Fecha invalida en precio batch"})
       if(moment(precio.fecha_tope).isAfter(moment(event.fecha_inicio_venta))) return res.status(400).json({error:"Fecha invalida en precio batch"})
@@ -297,7 +300,7 @@ export const validarCodigo = async (req: Request, res: Response) => {
     let order = await getOrder(orderId,prisma)
     if(!order?.codigo_descuento.includes(codigo)) return res.status(404).json({error:"Codigo no existe para esta orden"})
     let cod= await prisma.codigos_descuentos.findUnique({where:{cod:codigo}})
-    if(!cod) return res.status(400).json({error:"Codigo no existe"})
+    if(!cod || cod.veces_restantes<1) return res.status(400).json({error:"Codigo no existe o ya fue usado"})
     return res.json({cod})
   } catch (error) {
     console.log(error)
@@ -334,14 +337,15 @@ if(order.checkout_id) {
             status: 'vendido',
             txHash:transferFrom.hash,
             buyerId:buyer?.id,
-            completedAt:new Date()
+            completedAt:new Date(),
           },
         })
         await prisma.nfts.update({
           where:{id:order.nftId}, data:{
             User_id:buyer?.id,
             txHash:transferFrom.hash,
-            compradoAt: new Date()
+            compradoAt: new Date(),
+            precio_usado:order.precio_usado
           }
         })
         return res.json(order)

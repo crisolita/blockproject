@@ -261,12 +261,20 @@ export const getNFTSByEventsVendidos = async (req: Request, res: Response) => {
     const user=await getUserById(USER.id,prisma);
     if(!user) return res.status(404).json({error:"User no valido"})
     const evento= await getEventoById(Number(event_id),prisma)
+  
   if(evento?.creator_id!==USER.id) return res.status(404).json({error:"Evento no pertenece al usuario"}) 
-    let allnfts= await prisma.nfts.findMany({where:{eventoId:Number(event_id)}})
+let eventImage;
+  if(evento?.profile_image) {
+     eventImage= await getImage(evento?.profile_image)  
+  } 
+
+  let allnfts= await prisma.nfts.findMany({where:{eventoId:Number(event_id)}})
     let nfts=[];
     for (let nft of allnfts ) {
         if (nft.User_id==USER.id) continue
-        nfts.push(nft)
+        nfts.push({nft,
+        image:eventImage,
+        name:evento?.name})
     }
     return res.json(nfts)
   } catch (error) {
@@ -292,13 +300,13 @@ export const getInscripcionesByEvent = async (req: Request, res: Response) => {
       if(order?.adicionalesIds){
         for(let adicional of order.adicionalesIds) {
           const data=await prisma.adicionales.findUnique({where:{id:adicional}})
-          adicionales.push(data)
+          if (data) adicionales.push(data)
         }
       }
       if(order?.preguntasIds) {
         for(let pregunta of order.preguntasIds) {
           const data=await prisma.preguntas.findUnique({where:{id:pregunta}})
-          preguntas.push(data)
+          if(data) preguntas.push(data)
         }
       }
   
