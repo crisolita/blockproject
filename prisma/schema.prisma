@@ -140,6 +140,7 @@ model Eventos {
   fecha_final_venta  DateTime?
   fecha_asignacion   DateTime?
   descripcion        String?
+  dorsales           String[]
   Nfts               Nfts[]
   User               User?          @relation(fields: [creator_id], references: [id])
   Entrada            Entrada[]

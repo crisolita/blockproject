@@ -93,8 +93,8 @@ export const querySchemaValidarEntrada= Joi.object({
   qrData:Joi.string().required()
   });
   export const querySchemaDorsal= Joi.object({
-    dorsal_number:Joi.string().required(),nft_id:Joi.number().required()
-    });
+    dorsales:Joi.array().items(Joi.object({nftId:Joi.number().required(),dorsal:Joi.string().required()}))
+  });
    
     export const querySchemaSell= Joi.object({
       priceBatch:Joi.array().items(Joi.object({
