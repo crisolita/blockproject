@@ -252,6 +252,7 @@ export const asignarDorsal = async (req: Request, res: Response) => {
   const exist= await prisma.nfts.findFirst({where:{eventoId:nft.eventoId,dorsal:dorsal.dorsal}})
   if(exist) continue
   nft= await prisma.nfts.update({where:{id:dorsal.nftId},data:{dorsal:dorsal.dorsal}})
+  event= await updateEvento(event.id,{dorsales:[...event.dorsales,nft]},prisma)
   nfts.push(nft)
 }
   return res.json(nfts)
