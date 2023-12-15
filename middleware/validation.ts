@@ -8,7 +8,7 @@ export const querySchemaRegistro = Joi.object({
   'string.required': `Contraseña es requerida`,
 'string.pattern.base':"No cumple las condiciones de contraseña"}),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2})
     .required(),
 user_rol:Joi.string().valid('DEPORTISTA','ORGANIZADOR').required(),
 company_cif:Joi.string(),
@@ -21,7 +21,7 @@ export const querySchemaLogin = Joi.object({
   'string.required': `Contraseña es requerida`,
 'string.pattern.base':"No cumple las condiciones de contraseña"}),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2 })
     .required()
 });
 export const querySchemaChangePassword = Joi.object({
@@ -31,19 +31,19 @@ export const querySchemaChangePassword = Joi.object({
   'string.required': `Contraseña es requerida`,
 'string.pattern.base':"No cumple las condiciones de contraseña"}),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2 })
     .required(),
     authCode: Joi.string().required()
 });
 export const querySchemaValidate = Joi.object({
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2 })
     .required(),
     authCode: Joi.string().required()
 });
 export const querySchemaSendToken = Joi.object({
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2 })
     .required()});
 export const querySchemaCreateAndSellNFT = Joi.object({
   cantidad:Joi.number().required(),eventoId:Joi.number().required(),tipo:Joi.string().valid('Entrada'),priceBatch:Joi.array().items(Joi.object({

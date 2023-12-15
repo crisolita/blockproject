@@ -31,7 +31,7 @@ export const onboardLink = async (req: Request, res: Response) => {
     res.json({link:accountLink,origin:origin})
   } catch (e) {
     console.log(e)
-    res.status(500).json({error:e})
+    res.status(500).json(e)
   }
 }
 export const validateDataOnboarding= async (req:Request,res: Response) => {
