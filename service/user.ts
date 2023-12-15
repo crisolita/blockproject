@@ -31,7 +31,7 @@ export const updateUser = async (
     instagram?:string,
     twitter?:string,
     facebook?:string,
-    charges_enabled?:boolean,
+    charge_enable?:boolean,
   tokenValidUntil?:Date},
   prisma: PrismaClient
 ) => {

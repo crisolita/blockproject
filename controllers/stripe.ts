@@ -57,7 +57,7 @@ if(!verify.charges_enabled || !verify.details_submitted) {
   });
 } else  {
 //data completa poner en el user info que la data esta completa y puede vender
-await updateUser(USER.id,{charges_enabled:true},prisma)
+await updateUser(USER.id,{charge_enable:true},prisma)
 data="Onboarding exitoso!!"
 }
 return res.json(data)
