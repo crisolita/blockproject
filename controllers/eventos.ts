@@ -4,7 +4,7 @@ import {
   getUserById,
 } from "../service/user";
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
-import { getEntradaByEventoID } from "../service/entrada";
+import { getEntradaByEventoID, getEntradaByNFTID } from "../service/entrada";
 import { getImage, uploadImage } from "../service/aws";
 import { sendCambiosEventos } from "../service/mail";
 
@@ -354,6 +354,8 @@ nfts=nfts.filter((x)=>{
 })
 for (let nft of nfts) {
   const evento=await getEventoById(nft.eventoId,prisma)
+  const entrada= await getEntradaByNFTID(nft.id,prisma)
+  if(entrada) continue
   let image;
   if(evento?.profile_image) {
      image= await getImage(evento?.profile_image)
