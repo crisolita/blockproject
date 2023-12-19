@@ -69,7 +69,7 @@ if(!nft.dorsal) {
     // Generar el código QR a partir de los datos
     // Crear un nuevo documento PDF
 const doc = new PDFDocument();
-const path=`entrada_evento_${evento.id}_entrada_${entrada.id}.pdf`
+const path=`./entrada_evento_${evento.id}_entrada_${entrada.id}.pdf`
 doc.pipe(fs.createWriteStream(path));
 
 // Agregar texto e imagen del código QR al PDF
@@ -98,6 +98,7 @@ qr.toFile('codigo_qr.png', qrData, {
 const burn= await contract.connect(wallet).functions.burnIt(nftId)
 await prisma.nfts.update({where:{id:nftId},data:{txHash:burn.hash}})
 entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
+
 await sendEntrada(user.email,path,evento.name)
 fs.unlink(`${path}`, (err) => {
   if (err) {

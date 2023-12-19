@@ -62,6 +62,7 @@ model Nfts {
   marketplace        Boolean?
   respuestas         String?
   dorsal             String?
+  burned             Boolean?
   Evento             Eventos?    @relation(fields: [eventoId], references: [id])
   User               User?       @relation(fields: [User_id], references: [id])
 }
