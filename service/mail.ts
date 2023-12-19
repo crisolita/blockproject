@@ -32,7 +32,7 @@ export async function sendEntrada(email: string, path:string, name:string | null
     attachments: [
       {
         filename: 'entrada_evento.pdf',
-        path: `/Users/crisolcova/blockproject/${path}`, // Ruta al PDF que creaste
+        path: `${path}`, // Ruta al PDF que creaste
       },
     ],
   };
