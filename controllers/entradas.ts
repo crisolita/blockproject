@@ -98,15 +98,16 @@ qr.toFile('codigo_qr.png', qrData, {
 const burn= await contract.connect(wallet).functions.burnIt(nftId)
 await prisma.nfts.update({where:{id:nftId},data:{txHash:burn.hash}})
 entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
-
+console.log(path,"path")
 await sendEntrada(user.email,path,evento.name)
-fs.unlink(`${path}`, (err) => {
-  if (err) {
-    console.error('Error al eliminar el archivo:', err);
-  } else {
-    console.log('Archivo PDF eliminado correctamente.');
-  }
-});
+
+// fs.unlink(`${path}`, (err) => {
+//   if (err) {
+//     console.error('Error al eliminar el archivo:', err);
+//   } else {
+//     console.log('Archivo PDF eliminado correctamente.');
+//   }
+// });
 return res.json(entrada)   
   } catch (error) {
     
