@@ -71,6 +71,7 @@ if(!nft.dorsal) {
     // Crear un nuevo documento PDF
 const doc = new PDFDocument();
 const path2=path.join(__dirname,`entrada_evento_${evento.id}_entrada_${entrada.id}.pdf`)
+console.log(path2)
 doc.pipe(fs.createWriteStream(path2));
 
 // Agregar texto e imagen del código QR al PDF
