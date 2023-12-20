@@ -106,7 +106,7 @@ console.log("Falle linea 102")
 console.log("Falle linea 105")
 
 await prisma.nfts.update({where:{id:nftId},data:{txHash:"burn.hash"}})
-entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
+entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:"burn.hash"}})
 console.log(path2,"path")
 console.log("Falle linea 110")
 await sendEntrada(user.email,path2,evento.name)
