@@ -80,8 +80,10 @@ doc.text(`Evento: ${evento.name}`);
 doc.text(`Lugar: ${evento.place}`);
 doc.text(`Fecha: ${evento.date}`);
 doc.text(`Distancia: ${evento.distancia}`);
+console.log("Falle linea 83")
 
 const qrData= CryptoJS.AES.encrypt(JSON.stringify(eventData),process.env.SECRETKEY?process.env.SECRETKEY :"9817162").toString()
+console.log("Falle linea 86")
 
 // Generar el código QR y agregarlo al PDF
 // Generar el código QR como una imagen y agregarla al PDF
@@ -97,11 +99,17 @@ qr.toFile('codigo_qr.png', qrData, {
   doc.image('codigo_qr.png', { align: 'center' });
   doc.end();
 });
+console.log("Falle linea 102")
+
 const burn= await contract.connect(wallet).functions.burnIt(nftId)
+console.log("Falle linea 105")
+
 await prisma.nfts.update({where:{id:nftId},data:{txHash:burn.hash}})
 entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
 console.log(path2,"path")
+console.log("Falle linea 110")
 await sendEntrada(user.email,path2,evento.name)
+console.log("Falle linea 112")
 
 fs.unlink(`${path2}`, (err) => {
   if (err) {
@@ -110,6 +118,8 @@ fs.unlink(`${path2}`, (err) => {
     console.log('Archivo PDF eliminado correctamente.');
   }
 });
+console.log("Falle linea 121")
+
 return res.json(entrada)   
   } catch (error) {
     
