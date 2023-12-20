@@ -112,13 +112,13 @@ console.log("Falle linea 110")
 await sendEntrada(user.email,path2,evento.name)
 console.log("Falle linea 112")
 
-fs.unlink(`${path2}`, (err) => {
-  if (err) {
-    console.error('Error al eliminar el archivo:', err);
-  } else {
-    console.log('Archivo PDF eliminado correctamente.');
-  }
-});
+// fs.unlink(`${path2}`, (err) => {
+//   if (err) {
+//     console.error('Error al eliminar el archivo:', err);
+//   } else {
+//     console.log('Archivo PDF eliminado correctamente.');
+//   }
+// });
 console.log("Falle linea 121")
 
 return res.json(entrada)   
