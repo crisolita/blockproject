@@ -93,6 +93,7 @@ qr.toFile('codigo_qr.png', qrData, {
 }, (err) => {
   if (err) {
     console.error(err);
+    console.log("FUE EN LA CREACION DEL QR")
     return;
   }
 
@@ -101,10 +102,10 @@ qr.toFile('codigo_qr.png', qrData, {
 });
 console.log("Falle linea 102")
 
-const burn= await contract.connect(wallet).functions.burnIt(nftId)
+// const burn= await contract.connect(wallet).functions.burnIt(nftId)
 console.log("Falle linea 105")
 
-await prisma.nfts.update({where:{id:nftId},data:{txHash:burn.hash}})
+await prisma.nfts.update({where:{id:nftId},data:{txHash:"burn.hash"}})
 entrada=await prisma.entrada.update({where:{id:entrada.id},data:{qrCode:qrData, burnHash:burn.hash}})
 console.log(path2,"path")
 console.log("Falle linea 110")
