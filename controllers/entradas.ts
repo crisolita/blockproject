@@ -117,6 +117,23 @@ return res.json(entrada)
     res.status(500).json({ error:error});
   }
 };
+
+export const canjearNFTporEntadaTEST = async (req: Request, res: Response) => {
+  try {
+  
+const doc = new PDFDocument();
+const path2=path.join(__dirname,`entrada_evento_${10}_entrada_10.pdf`)
+console.log(path2)
+doc.pipe(fs.createWriteStream(path2));
+
+
+return res.json(path2)  
+  } catch (error) {
+    
+    console.log(error)
+    res.status(500).json({ error:error});
+  }
+};
 export const validarEntrada = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
