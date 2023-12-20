@@ -87,19 +87,19 @@ console.log("Falle linea 86")
 
 // Generar el código QR y agregarlo al PDF
 // Generar el código QR como una imagen y agregarla al PDF
-// qr.toFile('codigo_qr.png', qrData, {
-//   errorCorrectionLevel: 'H',
-//   width: 150,
-// }, (err) => {
-//   if (err) {
-//     console.error(err);
-//     console.log("FUE EN LA CREACION DEL QR")
-//     return;
-//   }
+qr.toFile('codigo_qr.png', qrData, {
+  errorCorrectionLevel: 'H',
+  width: 150,
+}, (err) => {
+  if (err) {
+    console.error(err);
+    console.log("FUE EN LA CREACION DEL QR")
+    return;
+  }
 
-//   doc.image('codigo_qr.png', { align: 'center' });
-//   doc.end();
-// });
+  doc.image('codigo_qr.png', { align: 'center' });
+  doc.end();
+});
 console.log("Falle linea 102")
 
 // const burn= await contract.connect(wallet).functions.burnIt(nftId)
