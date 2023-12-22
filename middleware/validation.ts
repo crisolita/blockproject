@@ -60,6 +60,9 @@ export const querySchemaValidate = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
   authCode: Joi.string().required(),
 });
+export const querySchemaGetEvent = Joi.object({
+  event_id: Joi.number().required(),
+});
 export const querySchemaSendToken = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
 });
