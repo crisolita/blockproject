@@ -174,12 +174,14 @@ export const querySchemaDorsal = Joi.object({
 });
 
 export const querySchemaSell = Joi.object({
-  priceBatch: Joi.array().items(
-    Joi.object({
-      precio: Joi.number().required(),
-      fecha_tope: Joi.string().required(),
-    })
-  ),
+  priceBatch: Joi.array()
+    .max(1)
+    .items(
+      Joi.object({
+        precio: Joi.number().required(),
+        fecha_tope: Joi.string().required(),
+      })
+    ),
   nftId: Joi.number().required(),
 });
 export const querySchemaBuy = Joi.object({

@@ -16,6 +16,8 @@ import {
 } from "../service/stripe";
 import { getEventoById } from "../service/evento";
 import moment from "moment";
+
+///Aqui resell
 export const sellNFT = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
@@ -31,13 +33,8 @@ export const sellNFT = async (req: Request, res: Response) => {
     const owner = await contract.functions.ownerOf(nftId);
     if (order) return res.status(400).json({ error: `NFT ya esta a la venta` });
     const now = moment();
-    if (
-      nft &&
-      owner[0] === user?.wallet &&
-      user?.acctStpId &&
-      nft.precio_usado
-    ) {
-      if (priceBatch.precio > nft?.precio_usado)
+    if (nft && owner[0] === user?.wallet && user?.acctStpId && nft.precio_max) {
+      if (priceBatch[0].precio > nft?.precio_max)
         return res.status(400).json({ error: "Precio muy alto" });
       const event = await getEventoById(nft.eventoId, prisma);
       if (!event)
@@ -59,6 +56,7 @@ export const sellNFT = async (req: Request, res: Response) => {
           precio_batch: JSON.stringify(priceBatch),
           status: "venta_activa",
           eventoId: event?.id,
+          resell: true,
           createdAt: new Date(),
         },
       });
@@ -72,6 +70,7 @@ export const sellNFT = async (req: Request, res: Response) => {
   }
 };
 
+/// precio max
 export const buyNFTfirstStep = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
@@ -106,7 +105,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     if (now.isAfter(moment(nft?.caducidadVenta)))
       return res.status(400).json({ error: "Venta ha terminado" });
     const seller = await getUserById(order?.sellerID, prisma);
-    let priceActual;
+    let priceActual, pricemax;
 
     if (!order.precio_batch)
       return res.status(404).json({ error: "No hay precios asignados" });
@@ -127,6 +126,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
         priceActual = price.precio;
       }
     }
+    pricemax = priceActual;
     console.log(precios);
     console.log(priceActual, "primero");
 
@@ -186,11 +186,17 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     console.log(priceActual);
 
     if (buyer && buyer.wallet && seller?.acctStpId && priceActual) {
-      const session = await createCheckoutSession(
+      let session = await createCheckoutSession(
         seller.acctStpId,
         (priceActual * 100).toString(),
-        order.id
+        order.id,
+        order.resell ? order.resell : undefined
       );
+
+      if (!session)
+        return res
+          .status(500)
+          .json({ error: "Fallo creacion de link de pago" });
       await prisma.orders.update({
         where: { id: order.id },
         data: {
@@ -199,6 +205,10 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
           buyerId: USER.id,
           precio_usado: priceActual,
         },
+      });
+      await prisma.nfts.update({
+        where: { id: order.nftId },
+        data: { precio_max: pricemax, precio_usado: priceActual },
       });
       return res.json(session.url);
     } else {

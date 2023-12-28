@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { getUserById } from "../service/user";
 import { createEvento, getEventoById, updateEvento } from "../service/evento";
-import { getEntradaByEventoID, getEntradaByNFTID } from "../service/entrada";
+import { getEntradaByNFTID } from "../service/entrada";
 import { getImage, uploadImage } from "../service/aws";
 import { sendCambiosEventos } from "../service/mail";
 
@@ -242,7 +242,7 @@ export const getEvent = async (req: Request, res: Response) => {
     const { event_id } = req.body;
     const evento = await getEventoById(Number(event_id), prisma);
     let ordersReSell = await prisma.orders.findMany({
-      where: { eventoId: event_id, status: "venta_activa" },
+      where: { eventoId: event_id, status: "venta_activa", resell: true },
     });
     ordersReSell = ordersReSell.filter((x) => {
       return x.sellerID != evento?.creator_id;

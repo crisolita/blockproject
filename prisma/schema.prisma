@@ -23,6 +23,7 @@ model orders {
   adicionalesUsados String?
   precio_batch      String
   license_required  Float?
+  resell            Boolean?
   adicionalesIds    Int[]
   preguntasIds      Int[]        
   codigo_descuento  String[]
@@ -57,6 +58,7 @@ model Nfts {
   txHash             String?
   compradoAt         DateTime?
   precio_usado       Float?
+  precio_max         Float?
   caducidadVenta     DateTime?
   caducidadCanjeo    DateTime?
   marketplace        Boolean?
