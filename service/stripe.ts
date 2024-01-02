@@ -79,7 +79,9 @@ export const createCheckoutSession = async (
       },
     });
     let fee;
-    reseller ? (fee = Number(amount) * 0.1) : (fee = Number(amount) * 0.03);
+    reseller
+      ? (fee = (Number(amount) / 100) * 0.1)
+      : (fee = (Number(amount) / 100) * 0.03);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
@@ -89,7 +91,7 @@ export const createCheckoutSession = async (
         },
       ],
       payment_intent_data: {
-        application_fee_amount: fee,
+        application_fee_amount: Math.round(fee * 100),
         transfer_data: {
           destination: receiverAccountId,
         },
@@ -98,15 +100,6 @@ export const createCheckoutSession = async (
       cancel_url: `https://4races.com/cancel/${orderId}`,
     });
     return session;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-};
-export const getBalance = async (acctStpId: string) => {
-  try {
-    const balance = await stripe.balance.retrieve(acctStpId);
-    return balance;
   } catch (e) {
     console.log(e);
     return false;
