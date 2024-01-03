@@ -4,7 +4,6 @@ import { getUserById } from "../service/user";
 import contract, { wallet } from "../service/web3";
 import {
   createOrder,
-  getIfOrderIsActive,
   getNftsById,
   getNftsForOrder,
   getOrder,
@@ -27,11 +26,13 @@ export const sellNFT = async (req: Request, res: Response) => {
     const { nftId, priceBatch } = req?.body;
     const user = await getUserById(USER.id, prisma);
     const nft = await getNftsForOrder(nftId, USER.id, prisma);
-    let order = await getIfOrderIsActive(nftId, prisma);
+    let order = await prisma.orders.findFirst({
+      where: { nftId: nftId, status: "venta_activa" },
+    });
+    if (order) return res.status(400).json({ error: `NFT ya esta a la venta` });
+    const owner = await contract.functions.ownerOf(nftId);
     if (nft?.User_id != USER.id)
       return res.status(400).json({ error: "NFT no pertenece al usaurio" });
-    const owner = await contract.functions.ownerOf(nftId);
-    if (order) return res.status(400).json({ error: `NFT ya esta a la venta` });
     const now = moment();
     if (nft && owner[0] === user?.wallet && user?.acctStpId && nft.precio_max) {
       if (priceBatch[0].precio > nft?.precio_max)
