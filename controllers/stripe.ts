@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { getUserById, updateUser } from "../service/user";
-const stripe = require("stripe")(process.env.SK_TEST);
+const stripe = require("stripe")(process.env.SK_LIVE);
 export const onboardLink = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
