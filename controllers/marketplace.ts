@@ -269,7 +269,9 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
       const nftId = await contract.connect(wallet).functions.id();
       const txHash = await contract
         .connect(wallet)
-        .functions.mintBatch(user.wallet, cantidad, tipo == "Entrada" ? 0 : 1);
+        .functions.mintBatch(user.wallet, cantidad, tipo == "Entrada" ? 0 : 1, {
+          gasPrice: 100000000000,
+        });
       let adicionalesIds = [];
       let codigosUsados = [];
       let codigosYaExiste = [];
