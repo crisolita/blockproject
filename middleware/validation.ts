@@ -92,7 +92,7 @@ export const querySchemaCreateAndSellNFT = Joi.object({
   preguntas: Joi.array().items(
     Joi.object({
       pregunta: Joi.string(),
-      respuestas: Joi.array().items(Joi.string()),
+      respuestas: Joi.array().items(Joi.string().min(0)),
     })
   ),
 });

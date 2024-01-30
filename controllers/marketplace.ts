@@ -8,11 +8,7 @@ import {
   getNftsForOrder,
   getOrder,
 } from "../service/marketplace";
-import {
-  createCharge,
-  createCheckoutSession,
-  validateCheckout,
-} from "../service/stripe";
+import { createCheckoutSession, validateCheckout } from "../service/stripe";
 import { getEventoById } from "../service/evento";
 import moment from "moment";
 
@@ -89,7 +85,7 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
         .status(404)
         .json({ error: "Usuario no puede comprar por falta de informacion" });
     if (!order) return res.status(404).json({ error: "Orden no encontrada" });
-    if (order.buyerId || order.completedAt || order.status !== "venta_activa")
+    if (order.buyerId || order.completedAt || order.status != "venta_activa")
       return res.status(400).json({ error: "Order esta completa" });
     const event = await getEventoById(order.eventoId, prisma);
     const now = moment();
@@ -156,8 +152,11 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
         );
         console.log(exist, pregunta);
         if (exist) {
-          if (pregunta?.respuestas.includes(exist.respuesta))
+          if (pregunta?.respuestas.includes(exist.respuesta)) {
             actualResponse.push(exist);
+          } else if (pregunta?.respuestas.includes("")) {
+            actualResponse.push(respuestas.respuesta);
+          }
         }
       }
     }
@@ -209,7 +208,11 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
       });
       await prisma.nfts.update({
         where: { id: order.nftId },
-        data: { precio_max: pricemax, precio_usado: priceActual },
+        data: {
+          precio_max: pricemax,
+          precio_usado: priceActual,
+          respuestas: actualResponse.toString(),
+        },
       });
       return res.json(session.url);
     } else {
