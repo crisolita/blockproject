@@ -467,7 +467,9 @@ export const confirmBuy = async (req: Request, res: Response) => {
       if (paid.payment_status == "paid") {
         const transferFrom = await contract
           .connect(wallet)
-          .functions.transferFrom(seller?.wallet, buyer?.wallet, order.nftId);
+          .functions.transferFrom(seller?.wallet, buyer?.wallet, order.nftId, {
+            gasPrice: 10000000000,
+          });
         order = await prisma.orders.update({
           where: { id: Number(order.id) },
           data: {
@@ -487,7 +489,7 @@ export const confirmBuy = async (req: Request, res: Response) => {
           },
         });
         return res.json(order);
-      }
+      } else return res.status(400).json({ error: "No ha pagado" });
     } else return res.status(404).json({ error: "No hay pago abierto" });
   } catch (error) {
     console.log(error);
