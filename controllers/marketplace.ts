@@ -273,7 +273,7 @@ export const createAndSellNFT = async (req: Request, res: Response) => {
       const txHash = await contract
         .connect(wallet)
         .functions.mintBatch(user.wallet, cantidad, tipo == "Entrada" ? 0 : 1, {
-          gasPrice: 100000000000,
+          gasPrice: 600000000000,
         });
       let adicionalesIds = [];
       let codigosUsados = [];
@@ -465,30 +465,41 @@ export const confirmBuy = async (req: Request, res: Response) => {
       const paid = await validateCheckout(order.checkout_id);
       console.log(paid);
       if (paid.payment_status == "paid") {
-        const transferFrom = await contract
-          .connect(wallet)
-          .functions.transferFrom(seller?.wallet, buyer?.wallet, order.nftId, {
-            gasPrice: 10000000000,
+        try {
+          const transferFrom = await contract
+            .connect(wallet)
+            .functions.transferFrom(
+              seller?.wallet,
+              buyer?.wallet,
+              order.nftId,
+              {
+                gasPrice: 500000000000,
+              }
+            );
+          console.log(transferFrom);
+          order = await prisma.orders.update({
+            where: { id: Number(order.id) },
+            data: {
+              status: "vendido",
+              txHash: transferFrom.hash,
+              buyerId: buyer?.id,
+              completedAt: new Date(),
+            },
           });
-        order = await prisma.orders.update({
-          where: { id: Number(order.id) },
-          data: {
-            status: "vendido",
-            txHash: transferFrom.hash,
-            buyerId: buyer?.id,
-            completedAt: new Date(),
-          },
-        });
-        await prisma.nfts.update({
-          where: { id: order.nftId },
-          data: {
-            User_id: buyer?.id,
-            txHash: transferFrom.hash,
-            compradoAt: new Date(),
-            precio_usado: order.precio_usado,
-          },
-        });
-        return res.json(order);
+          await prisma.nfts.update({
+            where: { id: order.nftId },
+            data: {
+              User_id: buyer?.id,
+              txHash: transferFrom.hash,
+              compradoAt: new Date(),
+              precio_usado: order.precio_usado,
+            },
+          });
+          return res.json(order);
+        } catch (e) {
+          console.log(e);
+          return res.status(500).json({ error: "Error al mintear" });
+        }
       } else return res.status(400).json({ error: "No ha pagado" });
     } else return res.status(404).json({ error: "No hay pago abierto" });
   } catch (error) {
