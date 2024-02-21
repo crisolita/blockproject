@@ -475,7 +475,15 @@ export const getAllInscripcionesVendidas = async (
       });
       for (let nft of allnfts) {
         if (nft.User_id == USER.id) continue;
-        nfts.push(nft);
+        let image = evento.profile_image
+          ? await getImage(evento.profile_image)
+          : null;
+        nfts.push({
+          nft,
+          evento_name: evento.name,
+          evento_place: evento.place,
+          image,
+        });
       }
     }
     return res.json(nfts);
