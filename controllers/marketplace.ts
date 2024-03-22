@@ -186,12 +186,18 @@ export const buyNFTfirstStep = async (req: Request, res: Response) => {
     console.log(priceActual);
 
     if (buyer && buyer.wallet && seller?.acctStpId && priceActual) {
-      let session = await createCheckoutSession(
-        seller.acctStpId,
-        (priceActual * 100).toString(),
-        order.id,
-        order.resell ? order.resell : undefined
-      );
+      let session;
+      try {
+        session = await createCheckoutSession(
+          seller.acctStpId,
+          (priceActual * 100).toString(),
+          order.id,
+          order.resell ? order.resell : undefined
+        );
+      } catch (e) {
+        console.log(e);
+        return res.status(500).json({ error: e });
+      }
 
       if (!session)
         return res
