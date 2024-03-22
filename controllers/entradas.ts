@@ -8,7 +8,7 @@ import qr from "qrcode";
 import fs from "fs";
 import PDFDocument, { dash } from "pdfkit";
 import { sendEntrada, sendToOrganizadorDorsalFaltante } from "../service/mail";
-import { getEntradaByNFTID } from "../service/entrada";
+import { getEntradaByNFTID, updateEntradaService } from "../service/entrada";
 import { getEventoById } from "../service/evento";
 import CryptoJS from "crypto-js";
 import path from "path";
@@ -43,12 +43,10 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     const creator = await getUserById(evento.creator_id, prisma);
     if (!nft.dorsal) {
       if (creator) await sendToOrganizadorDorsalFaltante(creator.email, nft.id);
-      return res
-        .status(400)
-        .json({
-          error:
-            "Nft no tiene dorsal asignado, ya se le ha informado a organizador para que lo coloque",
-        });
+      return res.status(400).json({
+        error:
+          "Nft no tiene dorsal asignado, ya se le ha informado a organizador para que lo coloque",
+      });
     }
     let entrada = await prisma.entrada.create({
       data: {
@@ -212,13 +210,38 @@ export const getEntradas = async (req: Request, res: Response) => {
     let entradas = await prisma.entrada.findMany();
     for (let ent of entradas) {
       const evento = await getEventoById(ent.evento_id, prisma);
-      if (
-        evento?.creator_id == USER.id ||
-        (ent.user_id == USER.id && !ent.used)
-      )
+      if (evento?.creator_id == USER.id || ent.user_id == USER.id)
         data.push(ent);
     }
     return res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+export const updateEntrada = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    const { entradaId, timeInSeconds, extraInfoAfter } = req?.body;
+    const user = await getUserById(USER.id, prisma);
+    if (!user) return res.status(404).json({ error: "User no valido" });
+    let entrada = await prisma.entrada.findUnique({
+      where: { id: entradaId, used: true },
+    });
+    if (!entrada)
+      return res
+        .status(404)
+        .json({ error: "Entrada no encontrada o  no ha sido utilizada" });
+
+    entrada = await updateEntradaService(
+      entradaId,
+      { timeInSeconds, extraInfoAfter },
+      prisma
+    );
+    return res.json(entrada);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });

@@ -24,6 +24,7 @@ import {
   querySchemaEditEvent,
   querySchemaGetEvent,
 } from "../middleware/validation";
+import test from "node:test";
 
 // Configuración de Multer
 const storage = multer.memoryStorage(); // Almacena la imagen en la memoria, puedes ajustarlo según tus necesidades
@@ -67,5 +68,5 @@ router.post("/nftsByUserByEvent", authenticateToken, getNFTSByUser);
 router.get("/nftsAllVendidos", authenticateToken, getAllInscripcionesVendidas);
 router.get("/nftsAllByUser", authenticateToken, getAllInscripcionesCompradas);
 router.post("/orders", authenticateToken, getInscripcionesByEvent);
-
+router.get("/lol", test);
 export default router;

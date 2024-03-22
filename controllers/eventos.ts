@@ -5,7 +5,7 @@ import { createEvento, getEventoById, updateEvento } from "../service/evento";
 import { getEntradaByNFTID } from "../service/entrada";
 import { getImage, uploadImage } from "../service/aws";
 import { sendCambiosEventos } from "../service/mail";
-
+import axios from "axios";
 export const createEvent = async (req: Request, res: Response) => {
   try {
     //@ts-ignore
@@ -490,5 +490,22 @@ export const getAllInscripcionesVendidas = async (
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
+  }
+};
+export const test = async (req: Request, res: Response) => {
+  try {
+    const list = await axios.get(
+      "https://www.clubrunning.es/api/type/index.php/events/list/",
+      {
+        params: {
+          token: "VkdUqVddWWRmlhvT4wsv636AdvXrHp9IeZ26MmPz30c",
+        },
+      }
+    );
+    console.log(list);
+    res.json(list);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error });
   }
 };

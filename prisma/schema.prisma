@@ -160,6 +160,8 @@ model Entrada {
   dorsal      String
   nftId       Int      @unique
   used        Boolean?
+  timeInSeconds Int?
+  extraInfoAfter String?
   burnHash    String?
   User        User?    @relation(fields: [user_id], references: [id])
   Evento      Eventos? @relation(fields: [evento_id], references: [id])
