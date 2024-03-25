@@ -263,9 +263,22 @@ export const getNFTS = async (req: Request, res: Response) => {
     const { event_id } = req.body;
     const user = await getUserById(USER.id, prisma);
     if (!user) return res.status(404).json({ error: "User no valido" });
-    let nfts = await prisma.nfts.findMany({
+    let data = await prisma.nfts.findMany({
       where: { eventoId: Number(event_id) },
     });
+    let nfts = [];
+    for (let dat of data) {
+      let event = await getEventoById(event_id, prisma);
+      let image;
+      if (event?.profile_image) {
+        image = await getImage(event?.profile_image);
+      }
+      nfts.push({
+        dat,
+        image,
+        name: `${user.first_name} ${user.last_name}`,
+      });
+    }
 
     return res.json(nfts);
   } catch (error) {

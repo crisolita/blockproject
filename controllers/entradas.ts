@@ -12,6 +12,7 @@ import { getEntradaByNFTID, updateEntradaService } from "../service/entrada";
 import { getEventoById } from "../service/evento";
 import CryptoJS from "crypto-js";
 import path from "path";
+import { getImage } from "../service/aws";
 
 export const canjearNFTporEntada = async (req: Request, res: Response) => {
   try {
@@ -123,7 +124,7 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
 
     const burn = await contract
       .connect(wallet)
-      .functions.burnIt(nftId, { gasPrice: 3000000000 });
+      .functions.burnIt(nftId, { gasPrice: 160000000000 });
     console.log("Falle linea 105", burn.hash);
 
     await prisma.nfts.update({
@@ -136,16 +137,16 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     });
     console.log(path2, "path");
     console.log("Falle linea 110");
-    // await sendEntrada(user.email,path2,evento.name)
+    await sendEntrada(user.email, path2, evento.name);
     console.log("Falle linea 112");
 
-    // fs.unlink(`${path2}`, (err) => {
-    //   if (err) {
-    //     console.error('Error al eliminar el archivo:', err);
-    //   } else {
-    //     console.log('Archivo PDF eliminado correctamente.');
-    //   }
-    // });
+    fs.unlink(`${path2}`, (err) => {
+      if (err) {
+        console.error("Error al eliminar el archivo:", err);
+      } else {
+        console.log("Archivo PDF eliminado correctamente.");
+      }
+    });
     console.log("Falle linea 121");
 
     return res.json(entrada);
@@ -212,8 +213,13 @@ export const getEntradas = async (req: Request, res: Response) => {
     let entradas = await prisma.entrada.findMany();
     for (let ent of entradas) {
       const evento = await getEventoById(ent.evento_id, prisma);
-      if (evento?.creator_id == USER.id || ent.user_id == USER.id)
-        data.push(ent);
+      if (evento?.creator_id == USER.id || ent.user_id == USER.id) {
+        let image;
+        if (evento?.profile_image) {
+          image = await getImage(evento?.profile_image);
+        }
+        data.push({ ent, name: evento?.name, fecha: evento?.date, image });
+      }
     }
     return res.json(data);
   } catch (error) {
