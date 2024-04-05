@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { getUserById } from "../service/user";
 import { getNftsById } from "../service/marketplace";
-import contract, { wallet } from "../service/web3";
+import contract, { provider, wallet } from "../service/web3";
 import moment from "moment";
 import qr from "qrcode";
 import fs from "fs";
@@ -122,21 +122,17 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     );
     console.log("Falle linea 102");
     ///manejar de que si falla en algun ounto que se le borre la entrada
-    console.log("y aquie");
-    console.log("y aquie");
-    console.log("y aquie");
+    let burn;
+    try {
+      const gasPrice = await provider.getGasPrice();
 
-    const burn = await contract
-      .connect(wallet)
-      .functions.transferFrom(
-        wallet.address,
-        "0x8Baef40961b0f610D584afB92D22199a0135D6E6",
-        nftId,
-        {
-          gasPrice: 600000000000,
-        }
-      );
-    console.log("Falle linea 105", burn.hash);
+      burn = await contract.connect(wallet).functions.burnIt(nftId, {
+        gasPrice: gasPrice.mul(2),
+      });
+      console.log("Falle linea 105", burn.hash);
+    } catch (e) {
+      await prisma.entrada.delete({ where: { id: entrada.id } });
+    }
 
     await prisma.nfts.update({
       where: { id: nftId },
