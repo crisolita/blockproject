@@ -124,7 +124,7 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
 
     const burn = await contract
       .connect(wallet)
-      .functions.burnIt(nftId, { gasPrice: 314000000000 });
+      .functions.burnIt(nftId, { gasPrice: 600000000000 });
     console.log("Falle linea 105", burn.hash);
 
     await prisma.nfts.update({
