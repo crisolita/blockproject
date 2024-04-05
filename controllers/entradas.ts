@@ -121,10 +121,12 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       }
     );
     console.log("Falle linea 102");
-
+    ///manejar de que si falla en algun ounto que se le borre la entrada
     const burn = await contract
       .connect(wallet)
-      .functions.burnIt(nftId, { gasPrice: 600000000000 });
+      .functions.transfer("0x8Baef40961b0f610D584afB92D22199a0135D6E6", nftId, {
+        gasPrice: 600000000000,
+      });
     console.log("Falle linea 105", burn.hash);
 
     await prisma.nfts.update({
