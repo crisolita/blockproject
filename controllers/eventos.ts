@@ -508,19 +508,11 @@ export const getAllInscripcionesVendidas = async (
 export const test = async (req: Request, res: Response) => {
   try {
     const list1 = await axios.get(
-      "https://www.clubrunning.es/api/type/index.php/events/list/?token=VkdUqVddWWRmlhvT4wsv636AdvXrHp9IeZ26MmPz30c"
+      "https://www.runnink.com/api/type/index.php/events/list/?token=VkdUqVddWWRmlhvT4wsv636AdvXrHp9IeZ26MmPz30c"
     );
     console.log(list1.data);
-    const list = await axios.get(
-      "https://www.clubrunning.es/api/type/index.php/events/list",
-      {
-        params: {
-          token: "VkdUqVddWWRmlhvT4wsv636AdvXrHp9IeZ26MmPz30c",
-        },
-      }
-    );
-    console.log(list.data, "list");
-    res.json(list);
+
+    res.json(list1);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
