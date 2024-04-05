@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { getUserById } from "./user";
-const stripe = require("stripe")(process.env.SK_LIVE);
+const stripe = require("stripe")(process.env.SK_TEST);
 
 export const createTransfer = async (
   receiverAccountId: string,
