@@ -131,6 +131,7 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       });
       console.log("Falle linea 105", burn.hash);
     } catch (e) {
+      console.log("Falle en el quemado");
       await prisma.entrada.delete({ where: { id: entrada.id } });
     }
 
