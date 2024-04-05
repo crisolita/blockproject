@@ -122,6 +122,10 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
     );
     console.log("Falle linea 102");
     ///manejar de que si falla en algun ounto que se le borre la entrada
+    console.log("y aquie");
+    console.log("y aquie");
+    console.log("y aquie");
+
     const burn = await contract
       .connect(wallet)
       .functions.transferFrom(
