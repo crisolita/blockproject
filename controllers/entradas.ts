@@ -188,7 +188,7 @@ export const validarEntrada = async (req: Request, res: Response) => {
     if (!user) return res.status(404).json({ error: "User no valido" });
     console.log(qrData, "qrData");
     let entrada = await prisma.entrada.findUnique({
-      where: { qrCode: qrData, used: false || null },
+      where: { qrCode: qrData, used: false },
     });
     console.log(entrada);
     if (!entrada)
