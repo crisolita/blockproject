@@ -187,14 +187,13 @@ export const validarEntrada = async (req: Request, res: Response) => {
     const user = await getUserById(USER.id, prisma);
     if (!user) return res.status(404).json({ error: "User no valido" });
     console.log(qrData, "qrData");
-    let entrada = await prisma.entrada.findUnique({
-      where: { qrCode: qrData, used: false },
+    let entrada = await prisma.entrada.findFirst({
+      where: { qrCode: qrData },
     });
     console.log(entrada);
     if (!entrada)
-      return res
-        .status(404)
-        .json({ error: "Entrada no encontrada o utilizada" });
+      return res.status(404).json({ error: "Entrada no encontrada" });
+    if (entrada.used) return res.status(404).json({ error: "Entrada usada" });
     const now = moment();
     if (!now.isBetween(moment(entrada.valid_start), moment(entrada.expire_at)))
       return res
