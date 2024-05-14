@@ -69,7 +69,9 @@ export const canjearNFTporEntada = async (req: Request, res: Response) => {
       distancia: evento.distancia,
       create_at: new Date(),
       entradaId: entrada.id,
-      valid_start: new Date(moment(evento.date).startOf("day").toString()),
+      valid_start: new Date(
+        moment(evento.date).subtract(3, "days").startOf("day").toString()
+      ),
       expire_at: new Date(moment(evento.date).endOf("day").toString()),
       nftId: nftId,
       dorsal: nft.dorsal,
