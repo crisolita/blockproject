@@ -229,7 +229,14 @@ export const getEntradas = async (req: Request, res: Response) => {
         if (evento?.profile_image) {
           image = await getImage(evento?.profile_image);
         }
-        data.push({ ent, name: evento?.name, fecha: evento?.date, image });
+        const username = await getUserById(ent.user_id, prisma);
+        data.push({
+          ent,
+          name: evento?.name,
+          fecha: evento?.date,
+          image,
+          username: `${username?.first_name} ${username?.last_name}`,
+        });
       }
     }
     return res.json(data);

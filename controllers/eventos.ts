@@ -364,7 +364,13 @@ export const getNFTSByEventsVendidos = async (req: Request, res: Response) => {
     let nfts = [];
     for (let nft of allnfts) {
       if (nft.User_id == USER.id) continue;
-      nfts.push({ nft, image: eventImage, name: evento?.name });
+      const username = await getUserById(nft.User_id, prisma);
+      nfts.push({
+        nft,
+        image: eventImage,
+        name: evento?.name,
+        username: `${username?.first_name} ${username?.last_name}`,
+      });
     }
     return res.json(nfts);
   } catch (error) {
